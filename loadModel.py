@@ -1,4 +1,4 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import torch
 
 
@@ -14,3 +14,14 @@ def loadModel(model_name):
     except Exception as e:
         print(f'Error loading model: {e}')
         return None, None
+
+def generate(model, tokenizer):
+    
+    response = client.chat_completion(messages, stop=stop_sequences, max_tokens=1000)
+    answer = response.choices[0].message.content
+    return answer
+
+def llm_engine(messages, client, stop_sequences=["Task"]) -> str:
+    response = client.chat_completion(messages, stop=stop_sequences, max_tokens=1000)
+    answer = response.choices[0].message.content
+    return answer
