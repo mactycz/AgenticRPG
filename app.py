@@ -22,7 +22,7 @@ def GenerateStory():
     random_token = str(uuid.uuid4())
     agent = CodeAgent(tools=[], llm_engine=llm_engine, add_base_tools=True,additional_authorized_imports=['json'])
     objects = agent.run(
-        f"""Step 1: Generate text for a start for an rpg session in 500 words and add it to list that will be returned.
+        f"""Step 1: Generate text for a start for an rpg session in 500 words and add it to list that will be returned. Generate it as a Game Master and narrator and leave the option for the player to act and influence the story.
         Step 2: Generate 4 character sheets with a name, hp, mana, attack, armor and magic resist in form of valid json objects and add them to the return list.
         Step 3: Summarize the story into a detailed and very visual prompt for an image generation model and add it to return list.
         Step 4: Summarize the story into a briefer text that contain all important information of what happened.
@@ -51,6 +51,7 @@ def GenerateContinuation(storySummary, UserInput):
         {storySummary}
         And continue based on user input:
         {UserInput}
+        Generate it as a Game Master and narrator and leave the option for the player to act and influence the story.
         Step 2: Summarize the story into a detailed and very visual prompt for an image generation model and add it to return list.
         Step 3: Summarize the story into a briefer text that contain all important information of what happened.
         The code should be very simple and you should use only basic python libraries.
