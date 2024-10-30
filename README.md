@@ -15,5 +15,8 @@ Currently the agent fail a lot. Works only once in a few tries. It migh be due t
 
 
 
-# Image generated for the beginning of the story:
+# Image generated for the beginning of the story with model stabilityai/stable-diffusion-xl-base-1.0:
 ![alt text](helpers/RPG.png)
+
+# Flow of the app
+![alt text](helpers/Flow.drawio.png)
