@@ -4,22 +4,16 @@ import uuid
 import os
 from transformers import Pipeline, CodeAgent
 from PIL import Image
+from app import clientImage,clientLLM
 
 
-
-def hf_load_model(LLM):
-    clientLLM = InferenceClient(LLM)
-    #clientImage = InferenceClient(ImageModel,)
+def hf_load_model(model):
+    clientLLM = InferenceClient(model)
     return clientLLM
-
-
-#LLM = "mistralai/Mistral-7B-Instruct-v0.2"
-ImageModel= "stabilityai/stable-diffusion-xl-base-1.0"
 
 
 
 def llm_engine(messages, stop_sequences=["Task"]) -> str:
-    clientLLM=hf_load_model("mistralai/Mistral-7B-Instruct-v0.1")
     response = clientLLM.chat_completion(messages, stop=stop_sequences, max_tokens=1000,temperature=0.7)
     answer = response.choices[0].message.content
     return answer
@@ -27,6 +21,7 @@ def llm_engine(messages, stop_sequences=["Task"]) -> str:
 def GenerateStory(prompt):
     random_token = str(uuid.uuid4())
     agent = CodeAgent(tools=[], llm_engine=llm_engine, add_base_tools=True,additional_authorized_imports=['json'])
+    print(llm_engine)
     objects = agent.run(
         f"""Step 1: Generate text for a start for an rpg session in 500 words based on below prompt and add it to list that will be returned.
         {prompt}

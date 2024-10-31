@@ -11,6 +11,7 @@ def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token):
         api_token = provided_api_token
     else:
         api_key = ""
+    print(api_choice,provided_api_key,provided_api_token)
     connect_to_api(api_choice,provided_api_key,provided_api_token)
     if provided_api_key:
         return gr.update(visible=True),gr.update(visible=False)
@@ -27,13 +28,16 @@ def update_auth_method(selected_auth):
         return gr.update(visible=False), gr.update(visible=False)
 
 def connect_to_api(api,api_key="",token_name=""):
-    if api=="hf":
+    print("Trying connection")
+    if api=="Huggingface API":
         if api_key!="":
+            print("Provided api key")
             try:
                 hf.login(api_key)
             except:
                 print("invalid api key")
-        elif token!="":
+        elif token_name!="":
+            print("Token provided")
             try:
                 token = os.environ.get(token_name)
                 hf.login(token)
@@ -41,5 +45,11 @@ def connect_to_api(api,api_key="",token_name=""):
                 print("invalid token or token name")
         elif token=="" and api_key=="":
             print("No auth method provided. This shouldn't be possible")
+        LLM = "mistralai/Mistral-7B-Instruct-v0.2"
+        ImageModel= "stabilityai/stable-diffusion-xl-base-1.0"
+        global clientLLM, clientImage
+        clientLLM=hf.hf_load_model(LLM)
+        clientImage = hf.hf_load_model(ImageModel)
+        print("MODELS LOADED")
     elif api=="local":
         print("local")
