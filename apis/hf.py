@@ -7,15 +7,19 @@ from PIL import Image
 
 
 
-token = os.environ.get('HF_TOKEN')
+def hf_load_model(LLM):
+    clientLLM = InferenceClient(LLM)
+    #clientImage = InferenceClient(ImageModel,)
+    return clientLLM
 
-LLM = "mistralai/Mistral-7B-Instruct-v0.2"
+
+#LLM = "mistralai/Mistral-7B-Instruct-v0.2"
 ImageModel= "stabilityai/stable-diffusion-xl-base-1.0"
-login(token)
-clientLLM = InferenceClient(LLM)
-clientImage = InferenceClient(ImageModel,)
+
+
 
 def llm_engine(messages, stop_sequences=["Task"]) -> str:
+    clientLLM=hf_load_model("mistralai/Mistral-7B-Instruct-v0.1")
     response = clientLLM.chat_completion(messages, stop=stop_sequences, max_tokens=1000,temperature=0.7)
     answer = response.choices[0].message.content
     return answer
