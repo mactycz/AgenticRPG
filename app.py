@@ -3,6 +3,7 @@ from apis import hf,local,openAI,Anthropic
 import gradio as gr
 import os
 #API key interface - disappears after providing api and shows main interface
+clientLLM, clientImage = None, None
 def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token):
     global api_key, api_token
     if provided_api_key:
@@ -27,7 +28,7 @@ def update_auth_method(selected_auth):
     else:
         return gr.update(visible=False), gr.update(visible=False)
 
-def connect_to_api(api,api_key="",token_name=""):
+def connect_to_api(api,api_key="",token_name="",LLM_Name="mistralai/Mistral-7B-Instruct-v0.3",ImageModelName="stabilityai/stable-diffusion-xl-base-1.0"):
     print("Trying connection")
     if api=="Huggingface API":
         if api_key!="":
@@ -45,11 +46,8 @@ def connect_to_api(api,api_key="",token_name=""):
                 print("invalid token or token name")
         elif token=="" and api_key=="":
             print("No auth method provided. This shouldn't be possible")
-        LLM = "mistralai/Mistral-7B-Instruct-v0.2"
-        ImageModel= "stabilityai/stable-diffusion-xl-base-1.0"
-        global clientLLM, clientImage
-        clientLLM=hf.hf_load_model(LLM)
-        clientImage = hf.hf_load_model(ImageModel)
         print("MODELS LOADED")
     elif api=="local":
         print("local")
+
+
