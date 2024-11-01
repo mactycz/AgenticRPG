@@ -1,6 +1,6 @@
 import gradio as gr
 from app import *
-
+from prompts import *
 dropdown_options = ['Local','Huggingface API','OpenAI','Anthropic']
 dropdown_options_api = ['','API key', 'Enviromental variable token']
 api_key = ""
@@ -19,7 +19,7 @@ with gr.Blocks(fill_width=True)as demo:
     with gr.Row(visible=False) as main_interface:
         with gr.Column():
             with gr.Row():
-                user_story = gr.Textbox(label="Story explaination",scale=3,)
+                user_story = gr.Textbox(label="Story explaination",scale=3)
                 generate_story_button = gr.Button("Generate story")
             with gr.Row():
                 story = gr.Textbox(label="Story",scale=3)
@@ -34,9 +34,9 @@ with gr.Blocks(fill_width=True)as demo:
             image= gr.Image(label="Image",height=600,)
             image_button = gr.Button("Generate Image")
 
-    generate_story_button.click(fn=hf.GenerateStory,inputs=user_story,outputs=[story,characters,image_prompt,summary], api_name="generateStory")
+    generate_story_button.click(fn=hf.GenerateText,inputs=[gr.State(localPromptStory),user_story],outputs=story, api_name="generateStory")
     image_button.click(fn=hf.GenerateImage,inputs=image_prompt,outputs=image,api_name="generateImage")
-    generate_continuation.click(fn=hf.GenerateContinuation,inputs =[summary,user_continuation],outputs=[story,image_prompt,summary], api_name="generateContinuation")
+    generate_continuation.click(fn=hf.GenerateText,inputs =[gr.State(localPromptStory),user_continuation],outputs=[story,image_prompt,summary], api_name="generateContinuation")
     api_key_button.click(fn=add_key_and_show_interface,inputs=[api_selection,api_key_input,api_token_input],outputs=[main_interface,selection_interface])
     change_api.click(fn=add_key_and_show_interface,inputs=[api_selection,api_key_input,api_token_input],outputs=[selection_interface,main_interface])
 
