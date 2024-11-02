@@ -3,7 +3,7 @@ from transformers import pipeline
 from PIL import Image
 from diffusers import DiffusionPipeline
 from huggingface_hub import InferenceClient
-
+from prompts import *
 def GenerateText(system_prompt,user_story):
     print(system_prompt+user_story)
     
@@ -17,10 +17,13 @@ def GenerateText(system_prompt,user_story):
 
     return output
 
-def GenerateImage(prompt):
+
+def GenerateImage(story):
+    prompt = GenerateText(summarize_for_image,story)
     client = InferenceClient(
         "stabilityai/stable-diffusion-3.5-large",
     )
+    print(prompt)
     image= client.text_to_image(prompt=prompt)
     image.save('RPG.png')
     return image
