@@ -1,0 +1,3 @@
+localPromptStory = f"Generate text for a start for an rpg session in 500 words based on a prompt below. Generate it as a Game Master and narrator and leave the option for the player to act and influence the story. "
+summarize_for_image= "Summarize this story into one prompt for image generation model. Focus the most important aspect that could be visualized - a place, a character or an event. Make it visual and detailed up to 100 words. It should enrich the story."
+abcd_options = "Generate 4 options for the player to choose from. Each option should be a possible action or a choice that the player can make. Make them different and interesting. Each option should be up to 50 words long."
