@@ -2,14 +2,15 @@
 from transformers import pipeline
 from PIL import Image
 from diffusers import DiffusionPipeline
-from huggingface_hub import InferenceClient
+from huggingface_hub import InferenceClient, login
 from prompts import *
-def GenerateText(system_prompt,user_story):
-    print(system_prompt+user_story)
-    
+def GenerateText(system_prompt,user_story,abcd=False):
+    if abcd:
+        system_prompt=system_prompt+abcd_options
     client = InferenceClient(
-        "mistralai/Mistral-7B-Instruct-v0.3",
+        "Qwen/Qwen2.5-72B-Instruct"
     )
+    print(system_prompt)
     output = client.chat_completion(messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_story + " Story:"},

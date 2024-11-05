@@ -20,27 +20,26 @@ def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token):
         return gr.update(visible=True),gr.update(visible=False)
     return gr.update(visible=False),gr.update(visible=True)
 
-def update_auth_method(selected_auth):
-    if selected_auth == 'API key':
-        return gr.update(visible=True), gr.update(visible=False),
-    elif selected_auth == 'Enviromental variable token':
-        return gr.update(visible=False), gr.update(visible=True)
-    else:
-        return gr.update(visible=False), gr.update(visible=False)
+def update_placeholders(option,auth,keys):
+    if auth=="Enviromental variable token":
+        return gr.update(value=keys[option])
 
-def connect_to_api(api,api_key="",token_name="",LLM_Name="mistralai/Mistral-7B-Instruct-v0.3",ImageModelName="stabilityai/stable-diffusion-xl-base-1.0"):
+def connect_to_api(api,auth,key):
     print("Trying connection")
+    if key=="":
+        print("No key provided")
     if api=="Huggingface API":
-        if api_key!="":
+        if auth=="API key":
             print("Provided api key")
             try:
                 hf.login(api_key)
             except:
                 print("invalid api key")
-        elif token_name!="":
-            print("Token provided")
+        elif auth=="Enviromental variable token":
+            print("Token provided: "+key)
             try:
-                token = os.environ.get(token_name)
+                token = os.environ.get(key)
+                print("Token: "+token)
                 hf.login(token)
             except:
                 print("invalid token or token name")
