@@ -18,30 +18,31 @@ with gr.Blocks(fill_width=True)as demo:
         api_auth_dropdown.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
         api_selection.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
     with gr.Row(visible=False) as main_interface:
-
         with gr.Column():
             with gr.Row():
-                user_story = gr.Textbox(label="Story explaination",scale=3)
+                user_story = gr.Textbox(label="Story description",scale=3)
                 with gr.Blocks():
                     with gr.Column():
                         generate_story_button = gr.Button("Generate story")
-                        abcd = gr.Checkbox(label="Use ABCD options")
+                        
             with gr.Row():
                 story = gr.Textbox(label="Story",scale=3)
-                characters = gr.Textbox(label="Characters",scale=3)
-                image_prompt = gr.Textbox(label="Image prompt",scale=3)
-                summary = gr.Textbox(label="Summary",scale=3)
             with gr.Row():
-                    user_continuation = gr.Textbox(label="User input",scale=3,)
-                    generate_continuation = gr.Button("Generate continuation")
+                chat_story = gr.ChatInterface(
+                fn=Chat,
+                additional_inputs=gr.Checkbox(label="Use ABCD options"),
+                chatbot=gr.Chatbot(height=300, value=[(None,initialize_story)])
+        )
+
+
         with gr.Column():
             change_api = gr.Button("Change API")
             image= gr.Image(label="Image",height=600,)
             image_button = gr.Button("Generate Image")
 
-    generate_story_button.click(fn=hf.GenerateText,inputs=[gr.State(localPromptStory),user_story,abcd],outputs=story, api_name="generateStory")
-    image_button.click(fn=hf.GenerateImage,inputs=story,outputs=image,api_name="generateImage")
-    generate_continuation.click(fn=hf.GenerateText,inputs =[gr.State(localPromptStory),user_continuation,abcd],outputs=[story,image_prompt,summary], api_name="generateContinuation")
+    generate_story_button.click(fn=GenerateText,inputs=[gr.State(localPromptStory),user_story],outputs=story, api_name="generateStory")
+    image_button.click(fn=GenerateImage,inputs=story,outputs=image,api_name="generateImage")
+    #generate_continuation.click(fn=hf.GenerateText,inputs =[gr.State(localPromptStory),user_continuation,abcd],outputs=[story,image_prompt,summary], api_name="generateContinuation")
     api_key_button.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value],outputs=[main_interface,selection_interface])
     change_api.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value],outputs=[selection_interface,main_interface])
 
