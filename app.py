@@ -50,12 +50,15 @@ def connect_to_api(api,auth,key):
         elif token=="" and api_key=="":
             print("No auth method provided. This shouldn't be possible")
         global clientLLM
-        clientLLM=Client("microsoft/Phi-3.5-mini-instruct")
+        clientLLM=Client("meta-llama/Llama-3.1-8B-Instruct")
         global clientImage
         clientImage=Client("stabilityai/stable-diffusion-3.5-large")
         print("MODELS LOADED")
     elif api=="local":
         print("local")
+
+
+
 def Client(model="Qwen/Qwen2.5-72B-Instruct"):
     from huggingface_hub import InferenceClient
     global client 
@@ -74,7 +77,7 @@ def Chat(message,history,abcd=False):
     if len(history) == 1:
         messages.append({"role": "assistant", "content": initialize_story})
         messages.append({"role": "user", "content": localPromptStory+message})
-        output = clientLLM.chat_completion(messages,temperature=0.7).choices[0]["message"]["content"]
+        output = clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000).choices[0]["message"]["content"]
         history.append([None,localPromptStory+message])
         history.append([localPromptStory+message,output])
     else:
@@ -83,7 +86,7 @@ def Chat(message,history,abcd=False):
                 messages.append({"role": "user", "content": user_msg})
             messages.append({"role": "assistant", "content": bot_msg})
         messages.append({"role": "user", "content": message})
-        response = clientLLM.chat_completion(messages,temperature=0.7)
+        response = clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000)
         output = response.choices[0]["message"]["content"]
         print(output)
         history.append((message,output))
