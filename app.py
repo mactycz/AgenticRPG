@@ -34,7 +34,6 @@ def connect_to_api(api,auth,key):
         print("No key provided")
     if api=="Huggingface API":
         from huggingface_hub import login
-
         if auth=="API key":
             print("Provided api key")
             try:
@@ -45,17 +44,15 @@ def connect_to_api(api,auth,key):
             print("Token provided: "+key)
             try:
                 token = os.environ.get(key)
-                print("Token: "+token)
                 login(token)
             except:
                 print("invalid token or token name")
         elif token=="" and api_key=="":
             print("No auth method provided. This shouldn't be possible")
         global clientLLM
-        clientLLM=Client()
+        clientLLM=Client("microsoft/Phi-3.5-mini-instruct")
         global clientImage
         clientImage=Client("stabilityai/stable-diffusion-3.5-large")
-        print(clientLLM)
         print("MODELS LOADED")
     elif api=="local":
         print("local")
@@ -63,17 +60,21 @@ def Client(model="Qwen/Qwen2.5-72B-Instruct"):
     from huggingface_hub import InferenceClient
     global client 
     client= InferenceClient(
-        "Qwen/Qwen2.5-72B-Instruct"
+        model
     )
     return client
 
 def Chat(message,history,abcd=False):
     messages=[]
-    messages.append({"role": "system", "content": localPromptStory})
+    if abcd:
+        messages.append({"role": "system", "content": localPromptStory+abcd_options})
+    else:
+        messages.append({"role": "system", "content": localPromptStory})
+    
     if len(history) == 1:
         messages.append({"role": "assistant", "content": initialize_story})
         messages.append({"role": "user", "content": localPromptStory+message})
-        output = clientLLM.chat_completion(messages, max_tokens=1000,temperature=0.7).choices[0]["message"]["content"]
+        output = clientLLM.chat_completion(messages,temperature=0.7).choices[0]["message"]["content"]
         history.append([None,localPromptStory+message])
         history.append([localPromptStory+message,output])
     else:
@@ -82,34 +83,23 @@ def Chat(message,history,abcd=False):
                 messages.append({"role": "user", "content": user_msg})
             messages.append({"role": "assistant", "content": bot_msg})
         messages.append({"role": "user", "content": message})
-        print(messages)
-        response = clientLLM.chat_completion(messages, max_tokens=50,temperature=0.7)
+        response = clientLLM.chat_completion(messages,temperature=0.7)
         output = response.choices[0]["message"]["content"]
+        print(output)
         history.append((message,output))
     return output
-    #     output = clientLLM.chat_completion(messages = 
-    #         history, max_tokens=10,temperature=0.7).choices[0]["message"]["content"]
-    #     print(output)
-    #     history.append({"role": "system", "content": output})
-    # print(history)
-    # for user_msg, bot_msg in history:
 
-    # messages.append({"role": "user", "content": user_input})
-    # print(chat_messages)
-    # return chat_messages,output
 
 def GenerateText(system_prompt,user_story):
-    
-    print(clientLLM)
-    print(system_prompt)
     output = clientLLM.chat_completion(messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_story + " Story:"},
-    ], max_tokens=1000,temperature=0.7).choices[0]["message"]["content"]
+    ],temperature=0.7).choices[0]["message"]["content"]
 
     return output
 
 def GenerateImage(story):
+    story = story[-1][-1]
     prompt = GenerateText(summarize_for_image,story)
     print(prompt)
     image= clientImage.text_to_image(prompt=prompt)
