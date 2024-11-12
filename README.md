@@ -14,6 +14,7 @@ Right now huggingface API works fine. OpenAI and Anthropic works great, but Imag
 - add image generation for OpenAI and Anthropic, as it currently works only for hf
 - add character portrait
 - implement RPG elements like stats, hp, rolling dices etc
+- fix the models to generate options to choose from only if abcd option is selected
 
 
 # Image generated for the beginning of the story with model stabilityai/stable-diffusion-xl-base-1.0:
