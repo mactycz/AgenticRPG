@@ -22,7 +22,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             chat_story = gr.ChatInterface(
             fn=Chat,
             chatbot=gr.Chatbot(height=600, value=[(None,initialize_story)]),
-            additional_inputs=gr.Checkbox(label="Use ABCD options"))
+            additional_inputs=[api_selection,gr.Checkbox(label="Use ABCD options")])
         with gr.Column():
             change_api = gr.Button("Change API")
             image= gr.Image(label="Image",height=600,)

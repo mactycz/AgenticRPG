@@ -29,6 +29,8 @@ def update_placeholders(option,auth,keys):
 
 
 def connect_to_api(api,auth,key):
+    global clientLLM
+    global clientImage
     print("Trying connection")
     if key=="":
         print("No key provided")
@@ -49,11 +51,45 @@ def connect_to_api(api,auth,key):
                 print("invalid token or token name")
         elif token=="" and api_key=="":
             print("No auth method provided. This shouldn't be possible")
-        global clientLLM
-        clientLLM=Client("meta-llama/Llama-3.1-8B-Instruct")
-        global clientImage
+        clientLLM=Client("Qwen/Qwen2.5-72B-Instruct")
         clientImage=Client("stabilityai/stable-diffusion-3.5-large")
         print("MODELS LOADED")
+
+
+
+    elif api =="OpenAI":
+        from openai import OpenAI
+        if auth=="API key":
+            print("Provided api key")
+            try:
+                OpenAI.api_key = api_key
+            except:
+                print("invalid api key")
+        elif auth=="Enviromental variable token":
+            print("Token provided: "+key)
+        elif token=="" and api_key=="":
+            print("No auth method provided. This shouldn't be possible")
+        clientLLM = OpenAI()
+        clientImage = OpenAI()
+        print("openai")
+
+
+
+
+    elif api == "Anthropic":
+        import anthropic
+        if auth=="API key":
+            print("Provided api key")
+            try:
+                OpenAI.api_key = api_key
+            except:
+                print("invalid api key")
+        elif auth=="Enviromental variable token":
+            print("Token provided: "+key)
+        elif token=="" and api_key=="":
+            print("No auth method provided. This shouldn't be possible")
+        clientLLM = anthropic.Anthropic()
+        print("anth")
     elif api=="local":
         print("local")
 
@@ -67,17 +103,20 @@ def Client(model="Qwen/Qwen2.5-72B-Instruct"):
     )
     return client
 
-def Chat(message,history,abcd=False):
-    messages=[]
-    if abcd:
-        messages.append({"role": "system", "content": localPromptStory+abcd_options})
-    else:
-        messages.append({"role": "system", "content": localPromptStory})
-    
+def Chat(message,history,selected_api,abcd=False):
+    api_call={
+        "Huggingface API": lambda msgs:clientLLM.chat_completion(msgs,temperature=0.7,max_tokens=2000).choices[0]["message"]["content"],
+        "OpenAI": lambda msgs: clientLLM.chat.completions.create(model="gpt-4o-mini",messages=msgs, temperature=0.7, max_tokens=2000).choices[0].message.content,
+        "Anthropic": lambda msgs: clientLLM.messages.create(model="claude-3-5-sonnet-20241022",messages=msgs, temperature=0.7, max_tokens=2000,system=localPromptStory + (abcd_options if abcd else "")).content[0].text,
+        "Local": lambda msgs: print(msgs) #placeholder for now
+    }
+
+    messages = [{"role": "system", "content": localPromptStory + (abcd_options if abcd else "")}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
     if len(history) == 1:
         messages.append({"role": "assistant", "content": initialize_story})
         messages.append({"role": "user", "content": localPromptStory+message})
-        output = clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000).choices[0]["message"]["content"]
+        output = api_call[selected_api](messages)
+        #clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000).choices[0]["message"]["content"]
         history.append([None,localPromptStory+message])
         history.append([localPromptStory+message,output])
     else:
@@ -86,11 +125,16 @@ def Chat(message,history,abcd=False):
                 messages.append({"role": "user", "content": user_msg})
             messages.append({"role": "assistant", "content": bot_msg})
         messages.append({"role": "user", "content": message})
-        response = clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000)
-        output = response.choices[0]["message"]["content"]
+
+
+
+        output = api_call[selected_api](messages)
+        #clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000)
         print(output)
         history.append((message,output))
     return output
+
+
 
 
 def GenerateText(system_prompt,user_story):
