@@ -7,7 +7,7 @@ from PIL import Image
 from diffusers import DiffusionPipeline
 clientLLM = None
 clientImage = None
-def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token):
+def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,model_name_llm):
     global api_key, api_token
     if provided_api_key:
         api_key = provided_api_key
@@ -16,7 +16,7 @@ def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token):
     else:
         api_key = ""
     print(api_choice,provided_api_key,provided_api_token)
-    connect_to_api(api_choice,provided_api_key,provided_api_token)
+    connect_to_api(api_choice,provided_api_key,provided_api_token,model_name_llm)
     if provided_api_key:
         return gr.update(visible=True),gr.update(visible=False)
     if provided_api_token:
@@ -28,7 +28,7 @@ def update_placeholders(option,auth,keys):
         return gr.update(value=keys[option])
 
 
-def connect_to_api(api,auth,key):
+def connect_to_api(api,auth,key,model_name_llm,model_name_image="stabilityai/stable-diffusion-3.5-large"):
     global clientLLM
     global clientImage
     print("Trying connection")
@@ -51,9 +51,9 @@ def connect_to_api(api,auth,key):
                 print("invalid token or token name")
         elif token=="" and api_key=="":
             print("No auth method provided. This shouldn't be possible")
-        clientLLM=Client("Qwen/Qwen2.5-72B-Instruct")
-        clientImage=Client("stabilityai/stable-diffusion-3.5-large")
-        print("MODELS LOADED")
+        clientLLM=Client(model_name_llm)
+        clientImage=Client(model_name_image)
+        print(f"MODELS LOADED {model_name_llm}, {model_name_image}")
 
 
 
@@ -95,7 +95,7 @@ def connect_to_api(api,auth,key):
 
 
 
-def Client(model="Qwen/Qwen2.5-72B-Instruct"):
+def Client(model):
     from huggingface_hub import InferenceClient
     global client 
     client= InferenceClient(
@@ -141,7 +141,7 @@ def GenerateText(system_prompt,user_story):
     output = clientLLM.chat_completion(messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_story + " Story:"},
-    ],temperature=0.7).choices[0]["message"]["content"]
+    ],temperature=0.7,max_tokens=500).choices[0]["message"]["content"]
 
     return output
 
