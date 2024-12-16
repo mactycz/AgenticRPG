@@ -7,7 +7,7 @@ from PIL import Image
 from diffusers import DiffusionPipeline
 clientLLM = None
 clientImage = None
-def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,model_name_llm):
+def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,model_name_llm, model_name_image):
     global api_key, api_token
     if provided_api_key:
         api_key = provided_api_key
@@ -16,7 +16,7 @@ def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,m
     else:
         api_key = ""
     print(api_choice,provided_api_key,provided_api_token)
-    connect_to_api(api_choice,provided_api_key,provided_api_token,model_name_llm)
+    connect_to_api(api_choice,provided_api_key,provided_api_token,model_name_llm,model_name_image)
     if provided_api_key:
         return gr.update(visible=True),gr.update(visible=False)
     if provided_api_token:
@@ -28,7 +28,7 @@ def update_placeholders(option,auth,keys):
         return gr.update(value=keys[option])
 
 
-def connect_to_api(api,auth,key,model_name_llm,model_name_image="stabilityai/stable-diffusion-3.5-large"):
+def connect_to_api(api,auth,key,model_name_llm,model_name_image):
     global clientLLM
     global clientImage
     print("Trying connection")
