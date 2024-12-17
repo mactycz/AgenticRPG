@@ -103,7 +103,7 @@ def Client(model):
     )
     return client
 
-def Chat(message,history,selected_api,abcd=False):
+def Chat(message,history,selected_api,abcd=False,generate_image_by_default=False):
     api_call={
         "Huggingface API": lambda msgs:clientLLM.chat_completion(msgs,temperature=0.7,max_tokens=2000).choices[0]["message"]["content"],
         "OpenAI": lambda msgs: clientLLM.chat.completions.create(model="gpt-4o-mini",messages=msgs, temperature=0.7, max_tokens=2000).choices[0].message.content,
@@ -125,19 +125,19 @@ def Chat(message,history,selected_api,abcd=False):
                 messages.append({"role": "user", "content": user_msg})
             messages.append({"role": "assistant", "content": bot_msg})
         messages.append({"role": "user", "content": message})
-
-
-
         output = api_call[selected_api](messages)
         #clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000)
-        print(output)
         history.append((message,output))
+
+
     return output
 
 
 
 
 def GenerateText(system_prompt,user_story):
+    print(system_prompt)
+    print(user_story)
     output = clientLLM.chat_completion(messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_story + " Story:"},
@@ -153,3 +153,9 @@ def GenerateImage(story):
     image.save('RPG.png')
     return image
 
+def conditional_generate_image(story,auto_generate):
+    print(auto_generate)
+    if auto_generate:
+        if story[-1][1] is not None:
+            return GenerateImage(story)
+    return None
