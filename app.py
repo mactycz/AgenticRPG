@@ -145,9 +145,12 @@ def GenerateText(system_prompt,user_story):
 
     return output
 
-def GenerateImage(story):
+def GenerateImage(story,style=""):
     story = story[-1][-1]
     prompt = GenerateText(summarize_for_image,story)
+    if style != "":
+        prompt = prompt+ f'''
+        Generate the image in {style} style'''
     print(prompt)
     image= clientImage.text_to_image(prompt=prompt)
     image.save('RPG.png')

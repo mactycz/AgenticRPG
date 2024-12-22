@@ -19,6 +19,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         api_value = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
         llm_name= gr.Textbox(label="Model name", interactive=True,value="meta-llama/Llama-3.3-70B-Instruct")
         image_model_name = gr.Textbox(label="Model name", interactive=True,value="black-forest-labs/FLUX.1-dev")
+        image_style = gr.Textbox(label="Image style",interactive=True)
         api_key_button = gr.Button("Connect")
         api_auth_dropdown.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
         api_selection.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
@@ -36,7 +37,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             change_api = gr.Button("Change API")
             image= gr.Image(label="Image",height=600,)
             image_button = gr.Button("Generate Image")
-    image_button.click(fn=GenerateImage,inputs=chat_story.chatbot,outputs=image,api_name="generateImage")
+    image_button.click(fn=GenerateImage,inputs=[chat_story.chatbot,image_style],outputs=image,api_name="generateImage")
     api_key_button.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],outputs=[main_interface,selection_interface])
     change_api.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],outputs=[selection_interface,main_interface])
     chat_story.chatbot.change(
