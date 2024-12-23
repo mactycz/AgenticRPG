@@ -42,7 +42,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
     change_api.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],outputs=[selection_interface,main_interface])
     chat_story.chatbot.change(
         fn=conditional_generate_image,
-        inputs=[chat_story.chatbot, chat_story.additional_inputs[2]],
+        inputs=[chat_story.chatbot, chat_story.additional_inputs[2],image_style],
         outputs=image
 )
 

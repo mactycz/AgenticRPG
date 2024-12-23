@@ -1,5 +1,6 @@
 from loadModel import loadModel
 import gradio as gr
+from gradio.components import Image
 import os
 #API key interface - disappears after providing api and shows main interface
 from prompts import *
@@ -136,8 +137,6 @@ def Chat(message,history,selected_api,abcd=False,generate_image_by_default=False
 
 
 def GenerateText(system_prompt,user_story):
-    print(system_prompt)
-    print(user_story)
     output = clientLLM.chat_completion(messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_story + " Story:"},
@@ -149,16 +148,17 @@ def GenerateImage(story,style=""):
     story = story[-1][-1]
     prompt = GenerateText(summarize_for_image,story)
     if style != "":
-        prompt = prompt+ f'''
-        Generate the image in {style} style'''
-    print(prompt)
+        prompt = prompt+ f' Generate the image in {style} style.'
+    print(f"Image prompt {prompt}")
     image= clientImage.text_to_image(prompt=prompt)
     image.save('RPG.png')
     return image
 
-def conditional_generate_image(story,auto_generate):
-    print(auto_generate)
+def conditional_generate_image(story,auto_generate, style=""):
+    print(f"Auto generate on: {auto_generate}")
     if auto_generate:
         if story[-1][1] is not None:
-            return GenerateImage(story)
-    return None
+            print(f"Player provided the story")
+            return GenerateImage(story,style)
+        
+    return "RPG.png" 
