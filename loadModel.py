@@ -1,27 +1,69 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
-
-
-def loadModel(model_name):
-    torch.cuda.empty_cache()
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    try:
-        print(f'loading {model_name}')
-        model = AutoModelForCausalLM.from_pretrained(model_name,device_map = 'cuda',low_cpu_mem_usage= True,use_safetensors=True,torch_dtype=torch.float16).to(device)
-        tokenizer = AutoTokenizer.from_pretrained(model_name,device_map = 'cuda')
-        print(f'Model {model_name} loaded')
-        return model, tokenizer
-    except Exception as e:
-        print(f'Error loading model: {e}')
-        return None, None
-
-def generate(model, tokenizer):
+class LocalTransformersClient:
+    def __init__(self, model_path):
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+        self.model = AutoModelForCausalLM.from_pretrained(
+            model_path,
+            torch_dtype=torch.float16,
+            device_map="auto"
+        )
+        
+    def generate_response(self, messages):
+        prompt = self.convert_messages_to_prompt(messages)
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
+        outputs = self.model.generate(
+            inputs["input_ids"],
+            max_new_tokens=8000,
+            temperature=0.7,
+            pad_token_id=self.tokenizer.eos_token_id
+        )
+        response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        return response[len(prompt):].strip()
     
-    response = client.chat_completion(messages, stop=stop_sequences, max_tokens=1000)
-    answer = response.choices[0].message.content
-    return answer
+    def convert_messages_to_prompt(self, messages):
+        prompt = ""
+        for message in messages:
+            role = message["role"]
+            content = message["content"]
+            if role == "system":
+                prompt += f"System: {content}\n"
+            elif role == "user":
+                prompt += f"User: {content}\n"
+            elif role == "assistant":
+                prompt += f"Assistant: {content}\n"
+        return prompt
 
-def llm_engine(messages, client, stop_sequences=["Task"]) -> str:
-    response = client.chat_completion(messages, stop=stop_sequences, max_tokens=1000)
-    answer = response.choices[0].message.content
-    return answer
+
+
+class LocalLlamaClient:
+    def __init__(self, model_path):
+        from llama_cpp import Llama
+        self.llm = Llama(
+            model_path=model_path,
+            n_gpu_layers=-1,
+            n_ctx=30000,
+        )
+    
+    def generate_response(self, messages):
+        prompt = self.convert_messages_to_prompt(messages)
+        response = self.llm(
+            prompt,
+            max_tokens=8000,
+            temperature=0.7,
+            stop=["User:", "System:"]
+        )
+        return response["choices"][0]["text"].strip()
+    
+    def convert_messages_to_prompt(self, messages):
+        prompt = ""
+        for message in messages:
+            role = message["role"]
+            content = message["content"]
+            if role == "system":
+                prompt += f"System: {content}\n"
+            elif role == "user":
+                prompt += f"User: {content}\n"
+            elif role == "assistant":
+                prompt += f"Assistant: {content}\n"
+        return prompt

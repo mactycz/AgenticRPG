@@ -1,4 +1,4 @@
-from loadModel import loadModel
+from loadModel import LocalLlamaClient, LocalTransformersClient
 import gradio as gr
 from gradio.components import Image
 import os
@@ -91,8 +91,20 @@ def connect_to_api(api,auth,key,model_name_llm,model_name_image):
             print("No auth method provided. This shouldn't be possible")
         clientLLM = anthropic.Anthropic()
         print("anth")
-    elif api=="local":
+
+    elif api == "Local":
         print("local")
+        try:
+            if "gguf" in model_name_llm:
+                print("llama")
+                clientLLM = LocalLlamaClient(model_name_llm)
+            else :
+                print("transformers")
+                clientLLM = LocalTransformersClient(model_name_llm)
+            print(f"Local model loaded: {model_name_llm}")
+
+        except Exception as e:
+            print(f"Error loading local model: {str(e)}")
 
 
 
@@ -104,12 +116,12 @@ def Client(model):
     )
     return client
 
-def Chat(message,history,selected_api,abcd=False,generate_image_by_default=False):
+def Chat(message,history,selected_api,abcd=False,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
     api_call={
         "Huggingface API": lambda msgs:clientLLM.chat_completion(msgs,temperature=0.7,max_tokens=2000).choices[0]["message"]["content"],
         "OpenAI": lambda msgs: clientLLM.chat.completions.create(model="gpt-4o-mini",messages=msgs, temperature=0.7, max_tokens=2000).choices[0].message.content,
         "Anthropic": lambda msgs: clientLLM.messages.create(model="claude-3-5-sonnet-20241022",messages=msgs, temperature=0.7, max_tokens=2000,system=localPromptStory + (abcd_options if abcd else "")).content[0].text,
-        "Local": lambda msgs: print(msgs) #placeholder for now
+        "Local": lambda msgs: clientLLM.generate_response(msgs)
     }
 
     messages = [{"role": "system", "content": localPromptStory + (abcd_options if abcd else "")}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
