@@ -165,7 +165,7 @@ def GenerateImage(story,style=""):
     print(f"Image prompt {prompt}")
     image= clientImage.text_to_image(prompt=prompt)
     date = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    image.save(f"image-{date}.png")
+    image.save(f"images/image-{date}.png")
 
     
     return image
@@ -177,4 +177,4 @@ def conditional_generate_image(story,auto_generate, style=""):
             print(f"Player provided the story")
             return GenerateImage(story,style)
         
-    return "RPG.png" 
+    return "helpers/placeholder.png" 
