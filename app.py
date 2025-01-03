@@ -2,10 +2,11 @@ from local import LocalLlamaClient, LocalTransformersClient
 import gradio as gr
 from gradio.components import Image
 import os
-#API key interface - disappears after providing api and shows main interface
 from prompts import *
 from PIL import Image
 from diffusers import DiffusionPipeline
+import datetime
+
 clientLLM = None
 clientImage = None
 def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,model_name_llm, model_name_image):
@@ -163,7 +164,10 @@ def GenerateImage(story,style=""):
         prompt = prompt+ f' Generate the image in {style} style.'
     print(f"Image prompt {prompt}")
     image= clientImage.text_to_image(prompt=prompt)
-    image.save('RPG.png')
+    date = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    image.save(f"image-{date}.png")
+
+    
     return image
 
 def conditional_generate_image(story,auto_generate, style=""):
