@@ -10,11 +10,10 @@ models_hf=[]
 api_key = ""
 api_token=""
 
-
 with gr.Blocks(fill_width=True,fill_height=True)as demo:
     with gr.Blocks() as selection_interface:
         with gr.Group():
-            label = gr.Label("LLM")
+            gr.Markdown("<h4 style='text-align: center; margin: 0; padding: 5px;'>LLM Settings</h4>")
             with gr.Row():
                 api_selection = gr.Dropdown(choices=dropdown_options, label="Select API", interactive=True,value="Huggingface API")
                 api_auth_dropdown= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
@@ -24,7 +23,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         
 
         with gr.Group():
-            label = gr.Label("Image model")
+            gr.Markdown("<h4 style='text-align: center; margin: 0; padding: 5px;'>Image model Settings</h4>")
             with gr.Row():
                 api_selection_image = gr.Dropdown(choices=dropdown_options, label="Select API", interactive=True,value="Huggingface API")
                 api_auth_dropdown_image= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
