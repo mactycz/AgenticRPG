@@ -1,4 +1,4 @@
-from loadModel import LocalLlamaClient, LocalTransformersClient
+from local import LocalLlamaClient, LocalTransformersClient
 import gradio as gr
 from gradio.components import Image
 import os
