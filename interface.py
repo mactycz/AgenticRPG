@@ -12,15 +12,29 @@ api_token=""
 
 
 with gr.Blocks(fill_width=True,fill_height=True)as demo:
+    with gr.Blocks() as selection_interface:
+        with gr.Group():
+            label = gr.Label("LLM")
+            with gr.Row():
+                api_selection = gr.Dropdown(choices=dropdown_options, label="Select API", interactive=True,value="Huggingface API")
+                api_auth_dropdown= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
+                api_value = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
+            with gr.Row():
+                llm_name= gr.Textbox(label="Model name", interactive=True,value="meta-llama/Llama-3.3-70B-Instruct")
+        
 
-    with gr.Row(visible=True) as selection_interface:
-        api_selection = gr.Dropdown(choices=dropdown_options, label="Select API", interactive=True,value="Huggingface API")
-        api_auth_dropdown= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
-        api_value = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
-        llm_name= gr.Textbox(label="Model name", interactive=True,value="meta-llama/Llama-3.3-70B-Instruct")
-        image_model_name = gr.Textbox(label="Model name", interactive=True,value="black-forest-labs/FLUX.1-dev")
-        image_style = gr.Textbox(label="Image style",interactive=True)
+        with gr.Group():
+            label = gr.Label("Image model")
+            with gr.Row():
+                api_selection_image = gr.Dropdown(choices=dropdown_options, label="Select API", interactive=True,value="Huggingface API")
+                api_auth_dropdown_image= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
+                api_value_image = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
+            with gr.Row():
+                image_model_name = gr.Textbox(label="Image model name", interactive=True,value="black-forest-labs/FLUX.1-dev")
+                image_style = gr.Textbox(label="Image style",interactive=True)
         api_key_button = gr.Button("Connect")
+
+
         api_auth_dropdown.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
         api_selection.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
     with gr.Row(visible=False) as main_interface:
