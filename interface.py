@@ -29,7 +29,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
                 api_auth_dropdown_image= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
                 api_value_image = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
             with gr.Row():
-                image_model_name = gr.Textbox(label="Image model name", interactive=True,value="black-forest-labs/FLUX.1-dev")
+                image_model_name = gr.Textbox(label="Image model name", interactive=True,value="stabilityai/stable-diffusion-3.5-large-turbo")
                 image_style = gr.Textbox(label="Image style",interactive=True)
         api_key_button = gr.Button("Connect")
 
