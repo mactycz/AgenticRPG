@@ -40,19 +40,23 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
 
         
     with gr.Row(visible=False) as main_interface:
-        with gr.Column():
-            chat_story = gr.ChatInterface(
-            fn=Chat,
-            chatbot=gr.Chatbot(height=600,
-                value=[(None,initialize_story)]),
-                additional_inputs=[api_selection,
-                    gr.Checkbox(label="Use ABCD options"),
-                    gr.Checkbox(label ="Automatically generate an image")])
-            
-        with gr.Column():
-            change_api = gr.Button("Change API")
-            image= gr.Image(label="Image",height=600,)
-            image_button = gr.Button("Generate Image")
+        with gr.Row():
+            with gr.Column():
+                chat_story = gr.ChatInterface(
+                fn=Chat,
+                chatbot=gr.Chatbot(height=600,
+                    value=[(None,initialize_story)]),
+                    additional_inputs=[api_selection,
+                        gr.Checkbox(label="Use ABCD options"),
+                        gr.Checkbox(label ="Automatically generate an image")])
+                
+            with gr.Column():
+                change_api = gr.Button("Change API")
+                image= gr.Image(label="Image",height=600,)
+                image_button = gr.Button("Generate Image")
+        with gr.Row():
+            gr.Button("Summarize and save the story")
+    
     image_button.click(fn=GenerateImage,inputs=[chat_story.chatbot,image_style],outputs=image,api_name="generateImage")
     change_api.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],outputs=[selection_interface,main_interface])
     api_key_button.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],outputs=[main_interface,selection_interface])
