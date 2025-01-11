@@ -4,7 +4,6 @@ from gradio.components import Image
 import os
 from prompts import *
 from PIL import Image
-from diffusers import DiffusionPipeline
 import datetime
 
 clientLLM = None
@@ -178,3 +177,18 @@ def conditional_generate_image(story,auto_generate, style=""):
             return GenerateImage(story,style)
         
     return "helpers/placeholder.png" 
+
+def summarize_and_save(story,name):
+    output = GenerateText(summarize_for_future,story)
+    with open(f"stories/{name}.json", "w") as file:
+        file.write(output)
+
+    gr.Info(f"Story saved as story-{name}.json")
+
+def load_story(name):
+    with open(f"stories/{name}.json", "r") as file:
+        return file.read()
+    
+
+
+
