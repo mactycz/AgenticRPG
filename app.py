@@ -179,6 +179,8 @@ def conditional_generate_image(story,auto_generate, style=""):
     return "helpers/placeholder.png" 
 
 def summarize_and_save(story,name):
+    story = story[:][:]
+    print(story)
     output = GenerateText(summarize_for_future,story)
     with open(f"stories/{name}.json", "w") as file:
         file.write(output)
@@ -187,7 +189,7 @@ def summarize_and_save(story,name):
 
 def load_story(name):
     with open(f"stories/{name}.json", "r") as file:
-        return file.read()
+        return f"Story so far: {file.read()}"
     
 
 

@@ -31,10 +31,19 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             with gr.Row():
                 image_model_name = gr.Textbox(label="Image model name", interactive=True,value="stabilityai/stable-diffusion-3.5-large-turbo")
                 image_style = gr.Textbox(label="Image style",interactive=True)
-        api_key_button = gr.Button("Connect")
 
+        with gr.Group():
+            with gr.Row():
+                load_name = gr.Textbox(label="Load story summary",interactive=True,value="")
+                with gr.Column():
+                    load_story_button_session = gr.Button("Load Story Session")
+                with gr.Column():
+                    load_story_button_summary = gr.Button("Load Story Summary")
+        api_key_button = gr.Button("Connect")
         api_auth_dropdown.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
         api_selection.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
+        # to do, loading story here
+        #load_story_button.click(fn=load_story,inputs=[load_name],outputs=)
         
 
 
@@ -54,16 +63,20 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
                 change_api = gr.Button("Change API")
                 image= gr.Image(label="Image",height=600,)
                 image_button = gr.Button("Generate Image")
+
         with gr.Row():
-            gr.Button("Summarize and save the story")
-    
+            save_name = gr.Textbox(label="Story name",interactive=True,value="")
+            save_story_button = gr.Button("Summarize and save the story")
+
+
+    save_story_button.click(fn=summarize_and_save,inputs=[chat_story.chatbot,save_name],outputs=None)
     image_button.click(fn=GenerateImage,inputs=[chat_story.chatbot,image_style],outputs=image,api_name="generateImage")
     change_api.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],outputs=[selection_interface,main_interface])
     api_key_button.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],outputs=[main_interface,selection_interface])
     chat_story.chatbot.change(
         fn=conditional_generate_image,
         inputs=[chat_story.chatbot, chat_story.additional_inputs[2],image_style],
-        outputs=image
-)
+        outputs=image)
+
 
 demo.launch()
