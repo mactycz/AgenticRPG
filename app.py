@@ -5,7 +5,7 @@ import os
 from prompts import *
 from PIL import Image
 import datetime
-
+import json
 clientLLM = None
 clientImage = None
 def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,model_name_llm, model_name_image):
@@ -178,18 +178,29 @@ def conditional_generate_image(story,auto_generate, style=""):
         
     return "helpers/placeholder.png" 
 
-def summarize_and_save(story,name):
-    story = story[:][:]
-    print(story)
-    output = GenerateText(summarize_for_future,story)
-    with open(f"stories/{name}.json", "w") as file:
-        file.write(output)
+def summarize_and_save(story,name, format = "txt"):
+    if format == "txt":
+        story_string = "\n\n".join(
+            f"user: {user_msg}\nnarrator: {narrator_msg}"
+            for user_msg, narrator_msg in story)
+        print(story_string)
+        output = GenerateText(summarize_for_future,story_string)
+        with open(f"stories/{name}.txt", "w+") as file:
+            file.write(output)
+    
+    elif format == "json":
+        story_json = json.dumps(story, indent=4)
+        with open(f"stories/{name}.json", "w+") as file:
+            file.write(story_json)
+    else:
+        print("Incorrect format")
 
-    gr.Info(f"Story saved as story-{name}.json")
+    gr.Info(f"Story saved as story-{name}.{format} in stories folder")
 
-def load_story(name):
-    with open(f"stories/{name}.json", "r") as file:
-        return f"Story so far: {file.read()}"
+def load_story(name,format = "txt"):
+    if format == "txt":
+        with open(f"stories/{name}.json", "r") as file:
+            return f"Story so far: {file.read()}"
     
 
 
