@@ -152,7 +152,7 @@ def GenerateText(system_prompt,user_story):
     output = clientLLM.chat_completion(messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_story + " Story:"},
-    ],temperature=0.7,max_tokens=500).choices[0]["message"]["content"]
+    ],temperature=0.7,max_tokens=1000).choices[0]["message"]["content"]
 
     return output
 
@@ -179,12 +179,13 @@ def conditional_generate_image(story,auto_generate, style=""):
     return "helpers/placeholder.png" 
 
 def summarize_and_save(story,name, format = "txt"):
+    gr.Info("Generating summary, it might take a minute")
     if format == "txt":
         story_string = "\n\n".join(
             f"user: {user_msg}\nnarrator: {narrator_msg}"
             for user_msg, narrator_msg in story)
-        print(story_string)
         output = GenerateText(summarize_for_future,story_string)
+        print(output)
         with open(f"stories/{name}.txt", "w+") as file:
             file.write(output)
     
@@ -199,7 +200,7 @@ def summarize_and_save(story,name, format = "txt"):
 
 def load_story(name,format = "txt"):
     if format == "txt":
-        with open(f"stories/{name}.json", "r") as file:
+        with open(f"stories/{name}.txt", "r") as file:
             return f"Story so far: {file.read()}"
     
 
