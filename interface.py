@@ -11,6 +11,7 @@ api_key = ""
 api_token=""
 
 with gr.Blocks(fill_width=True,fill_height=True)as demo:
+    initialize_story_state = gr.State(initialize_story)
     with gr.Column() as selection_interface:
         with gr.Group():
             gr.Markdown("<h4 style='text-align: center; margin: 0; padding: 5px;'>LLM Settings</h4>")
@@ -43,18 +44,13 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         api_auth_dropdown.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
         api_selection.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
         # to do, loading story here
-        #load_story_button.click(fn=load_story,inputs=[load_name],outputs=)
-        
-
-
-        
     with gr.Row(visible=False) as main_interface:
         with gr.Row():
             with gr.Column():
                 chat_story = gr.ChatInterface(
                 fn=Chat,
                 chatbot=gr.Chatbot(height=600,
-                    value=[(None,initialize_story)]),
+                    value=[(None,initialize_story_state.value)]),
                     additional_inputs=[api_selection,
                         gr.Checkbox(label="Use ABCD options"),
                         gr.Checkbox(label ="Automatically generate an image")])
@@ -67,8 +63,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         with gr.Row():
             save_name = gr.Textbox(label="Story name",interactive=True,value="")
             save_story_button = gr.Button("Summarize and save the story")
-
-
+    load_story_button_summary.click(fn=load_story,inputs=[load_name],outputs=[initialize_story_state,chat_story.chatbot])
     save_story_button.click(fn=summarize_and_save,inputs=[chat_story.chatbot,save_name],outputs=None)
     image_button.click(fn=GenerateImage,inputs=[chat_story.chatbot,image_style],outputs=image,api_name="generateImage")
     change_api.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],outputs=[selection_interface,main_interface])

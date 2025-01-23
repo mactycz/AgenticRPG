@@ -201,7 +201,8 @@ def summarize_and_save(story,name, format = "txt"):
 def load_story(name,format = "txt"):
     if format == "txt":
         with open(f"stories/{name}.txt", "r") as file:
-            return f"Story so far: {file.read()}"
+            story = f"Story so far: {file.read()}"
+            return story, [(None,story)]
     
 
 
