@@ -148,11 +148,11 @@ def Chat(message,history,selected_api,abcd=False,automatic_image=False): # the a
 
 
 
-def GenerateText(system_prompt,user_story):
+def GenerateText(system_prompt,user_story,max_tokens=500):
     output = clientLLM.chat_completion(messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_story + " Story:"},
-    ],temperature=0.7,max_tokens=1000).choices[0]["message"]["content"]
+    ],temperature=0.7,max_tokens=max_tokens).choices[0]["message"]["content"]
 
     return output
 
@@ -184,7 +184,7 @@ def summarize_and_save(story,name, format = "txt"):
         story_string = "\n\n".join(
             f"user: {user_msg}\nnarrator: {narrator_msg}"
             for user_msg, narrator_msg in story)
-        output = GenerateText(summarize_for_future,story_string)
+        output = GenerateText(summarize_for_future,story_string,1000)
         print(output)
         with open(f"stories/{name}.txt", "w+") as file:
             file.write(output)
