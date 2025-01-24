@@ -179,9 +179,9 @@ def conditional_generate_image(story,auto_generate,selected_api ,style=""):
         
     return "helpers/placeholder.png" 
 
-def summarize_and_save(story,name,selected_api,format = "txt"):
+def summarize_and_save(story,name,selected_api,format):
     gr.Info("Generating summary, it might take a minute")
-    if format == "txt":
+    if format == "Session summary":
         story_string = "\n\n".join(
             f"user: {user_msg}\nnarrator: {narrator_msg}"
             for user_msg, narrator_msg in story)
@@ -190,7 +190,7 @@ def summarize_and_save(story,name,selected_api,format = "txt"):
         with open(f"stories/{name}.txt", "w+") as file:
             file.write(output)
     
-    elif format == "json":
+    elif format == "Full session":
         story_json = json.dumps(story, indent=4)
         with open(f"stories/{name}.json", "w+") as file:
             file.write(story_json)
