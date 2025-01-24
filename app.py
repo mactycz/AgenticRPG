@@ -116,19 +116,22 @@ def Client(model):
     )
     return client
 
-def Chat(message,history,selected_api,abcd=False,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
+def api_call(msgs,selected_api,temperature = 0.7, max_tokens= 2000 , system_message = localPromptStory):
     api_call={
-        "Huggingface API": lambda msgs:clientLLM.chat_completion(msgs,temperature=0.7,max_tokens=2000).choices[0]["message"]["content"],
-        "OpenAI": lambda msgs: clientLLM.chat.completions.create(model="gpt-4o-mini",messages=msgs, temperature=0.7, max_tokens=2000).choices[0].message.content,
-        "Anthropic": lambda msgs: clientLLM.messages.create(model="claude-3-5-sonnet-20241022",messages=msgs, temperature=0.7, max_tokens=2000,system=localPromptStory + (abcd_options if abcd else "")).content[0].text,
+        "Huggingface API": lambda msgs:clientLLM.chat_completion(msgs,temperature=temperature,max_tokens=max_tokens).choices[0]["message"]["content"],
+        "OpenAI": lambda msgs: clientLLM.chat.completions.create(model="gpt-4o-mini",messages=msgs, temperature=temperature, max_tokens=max_tokens).choices[0].message.content,
+        "Anthropic": lambda msgs: clientLLM.messages.create(model="claude-3-5-sonnet-20241022",messages=msgs, temperature=temperature, max_tokens=max_tokens,system=system_message).content[0].text,
         "Local": lambda msgs: clientLLM.generate_response(msgs)
     }
+    return api_call[selected_api](msgs)
 
+
+def Chat(message,history,selected_api,abcd=False,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
     messages = [{"role": "system", "content": localPromptStory + (abcd_options if abcd else "")}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
     if len(history) == 1:
         messages.append({"role": "assistant", "content": initialize_story})
         messages.append({"role": "user", "content": localPromptStory+message})
-        output = api_call[selected_api](messages)
+        output = api_call(messages,selected_api)
         #clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000).choices[0]["message"]["content"]
         history.append([None,localPromptStory+message])
         history.append([localPromptStory+message,output])
@@ -148,17 +151,15 @@ def Chat(message,history,selected_api,abcd=False,automatic_image=False): # the a
 
 
 
-def GenerateText(system_prompt,user_story,max_tokens=500):
-    output = clientLLM.chat_completion(messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_story + " Story:"},
-    ],temperature=0.7,max_tokens=max_tokens).choices[0]["message"]["content"]
-
+def GenerateText(system_prompt,user_story,selected_api,max_tokens=500):
+    messages = [{"role": "system", "content": system_prompt}] if selected_api != "Anthropic" else []
+    messages.append({"role": "user", "content": user_story + " Story:"})
+    output = api_call(messages,selected_api=selected_api,temperature=0.7,max_tokens=max_tokens,system_message=system_prompt)
     return output
 
-def GenerateImage(story,style=""):
+def GenerateImage(story,selected_api,style=""):
     story = story[-1][-1]
-    prompt = GenerateText(summarize_for_image,story)
+    prompt = GenerateText(summarize_for_image,story,selected_api)
     if style != "":
         prompt = prompt+ f' Generate the image in {style} style.'
     print(f"Image prompt {prompt}")
@@ -169,22 +170,22 @@ def GenerateImage(story,style=""):
     
     return image
 
-def conditional_generate_image(story,auto_generate, style=""):
+def conditional_generate_image(story,auto_generate,selected_api ,style=""):
     print(f"Auto generate on: {auto_generate}")
     if auto_generate:
         if story[-1][1] is not None:
             print(f"Player provided the story")
-            return GenerateImage(story,style)
+            return GenerateImage(story,selected_api,style)
         
     return "helpers/placeholder.png" 
 
-def summarize_and_save(story,name, format = "txt"):
+def summarize_and_save(story,name,selected_api,format = "txt"):
     gr.Info("Generating summary, it might take a minute")
     if format == "txt":
         story_string = "\n\n".join(
             f"user: {user_msg}\nnarrator: {narrator_msg}"
             for user_msg, narrator_msg in story)
-        output = GenerateText(summarize_for_future,story_string,1000)
+        output = GenerateText(summarize_for_future,story_string,selected_api,1000)
         print(output)
         with open(f"stories/{name}.txt", "w+") as file:
             file.write(output)

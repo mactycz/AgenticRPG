@@ -64,13 +64,13 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             save_name = gr.Textbox(label="Story name",interactive=True,value="")
             save_story_button = gr.Button("Summarize and save the story")
     load_story_button_summary.click(fn=load_story,inputs=[load_name],outputs=[initialize_story_state,chat_story.chatbot])
-    save_story_button.click(fn=summarize_and_save,inputs=[chat_story.chatbot,save_name],outputs=None)
-    image_button.click(fn=GenerateImage,inputs=[chat_story.chatbot,image_style],outputs=image,api_name="generateImage")
+    save_story_button.click(fn=summarize_and_save,inputs=[chat_story.chatbot,save_name,api_selection],outputs=None)
+    image_button.click(fn=GenerateImage,inputs=[chat_story.chatbot,api_selection,image_style],outputs=image,api_name="generateImage")
     change_api.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],outputs=[selection_interface,main_interface])
     api_key_button.click(fn=add_key_and_show_interface,inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],outputs=[main_interface,selection_interface])
     chat_story.chatbot.change(
         fn=conditional_generate_image,
-        inputs=[chat_story.chatbot, chat_story.additional_inputs[2],image_style],
+        inputs=[chat_story.chatbot, chat_story.additional_inputs[2],api_selection,image_style],
         outputs=image)
 
 
