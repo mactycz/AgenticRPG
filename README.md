@@ -9,7 +9,6 @@ The pipeline at first was text generations with pipelines, but then after discov
 Right now huggingface API works fine. OpenAI and Anthropic works great, for text generation. 
 Huggingface API with image generation works, however it takes a long time and often models are too busy and don't return anything. That's why the option for automatic image generation doesn't work that well.
 # TODO
-- add save session button
 - add image generation for OpenAI and local, as it currently works only for hf
 - add character portrait
 - implement RPG elements like stats, hp, rolling dices etc
