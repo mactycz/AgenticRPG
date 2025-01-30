@@ -141,7 +141,7 @@ def Chat(message,history,selected_api,abcd=False,automatic_image=False): # the a
                 messages.append({"role": "user", "content": user_msg})
             messages.append({"role": "assistant", "content": bot_msg})
         messages.append({"role": "user", "content": message})
-        output = api_call[selected_api](messages)
+        output = api_call(messages,selected_api)
         #clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000)
         history.append((message,output))
 
