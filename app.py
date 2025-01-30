@@ -180,8 +180,9 @@ def conditional_generate_image(story,auto_generate,selected_api ,style=""):
     return "helpers/placeholder.png" 
 
 def summarize_and_save(story,name,selected_api,format):
-    gr.Info("Generating summary, it might take a minute")
+    
     if format == "Session summary":
+        gr.Info("Generating summary, it might take a minute")
         story_string = "\n\n".join(
             f"user: {user_msg}\nnarrator: {narrator_msg}"
             for user_msg, narrator_msg in story)
@@ -199,11 +200,16 @@ def summarize_and_save(story,name,selected_api,format):
 
     gr.Info(f"Story saved as story-{name}.{format} in stories folder")
 
-def load_story(name,format = "txt"):
-    if format == "txt":
+def load_story(name,format):
+    if format == "Session summary":
         with open(f"stories/{name}.txt", "r") as file:
             story = f"Story so far: {file.read()}"
             return story, [(None,story)]
+    elif format == "Full session":
+        with open(f"stories/{name}.json", "r") as file:
+            story = json.load(file)
+            return "",story
+
     
 
 
