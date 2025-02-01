@@ -118,7 +118,7 @@ def Client(model):
 
 def api_call(msgs,selected_api,temperature = 0.7, max_tokens= 2000 , system_message = localPromptStory):
     api_call={
-        "Huggingface API": lambda msgs:clientLLM.chat_completion(msgs,temperature=temperature,max_tokens=max_tokens).choices[0]["message"]["content"],
+        "Huggingface API": lambda msgs:clientLLM.chat.completions.create(msgs,temperature=temperature,max_tokens=max_tokens).choices[0]["message"]["content"],
         "OpenAI": lambda msgs: clientLLM.chat.completions.create(model="gpt-4o-mini",messages=msgs, temperature=temperature, max_tokens=max_tokens).choices[0].message.content,
         "Anthropic": lambda msgs: clientLLM.messages.create(model="claude-3-5-sonnet-20241022",messages=msgs, temperature=temperature, max_tokens=max_tokens,system=system_message).content[0].text,
         "Local": lambda msgs: clientLLM.generate_response(msgs)
