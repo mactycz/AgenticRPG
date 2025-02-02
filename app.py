@@ -6,8 +6,40 @@ from prompts import *
 from PIL import Image
 import datetime
 import json
+import uuid
 clientLLM = None
 clientImage = None
+
+SESSION_REGISTRY = "sessions_registry.json"
+
+def generate_session_id():
+    return str(uuid.uuid4())
+
+def update_registry(session_name, session_id, format):
+    try:
+        with open(SESSION_REGISTRY, "r") as f:
+            registry = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        registry = []
+    registry = [entry for entry in registry 
+                if not (entry["name"] == session_name and entry["format"] == format)] #removing the existing sessions with the same format and ind
+    registry.append({
+        "name": session_name,
+        "id": session_id,
+        "format": format,
+        "timestamp": datetime.datetime.now().isoformat()
+    })
+    with open(SESSION_REGISTRY, "w") as f:
+        json.dump(registry, f , indent=2)
+
+def get_saved_sessions():
+    try:
+        with open(SESSION_REGISTRY, "r") as f:
+            registry = json.load(f)
+        return [(f"{entry['name']} ({entry['format']})",entry["id"]) for entry in registry]
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
 def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,model_name_llm, model_name_image):
     global api_key, api_token
     if provided_api_key:
@@ -157,7 +189,7 @@ def GenerateText(system_prompt,user_story,selected_api,max_tokens=500):
     output = api_call(messages,selected_api=selected_api,temperature=0.7,max_tokens=max_tokens,system_message=system_prompt)
     return output
 
-def GenerateImage(story,selected_api,style=""):
+def GenerateImage(story,selected_api,session_id,style=""):
     story = story[-1][-1]
     prompt = GenerateText(summarize_for_image,story,selected_api)
     if style != "":
@@ -165,50 +197,79 @@ def GenerateImage(story,selected_api,style=""):
     print(f"Image prompt {prompt}")
     image= clientImage.text_to_image(prompt=prompt)
     date = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    image.save(f"images/image-{date}.png")
-
-    
+    image_dir = f"session/{session_id}/images"
+    os.makedirs(image_dir, exist_ok=True)
+    image.save(f"{image_dir}/image-{date}.png")
     return image
 
-def conditional_generate_image(story,auto_generate,selected_api ,style=""):
-    print(f"Auto generate on: {auto_generate}")
+def conditional_generate_image(story,auto_generate,selected_api,session_id ,style=""):
     if auto_generate:
         if story[-1][1] is not None:
-            print(f"Player provided the story")
-            return GenerateImage(story,selected_api,style)
-        
+            return GenerateImage(story,selected_api,session_id,style)
     return "helpers/placeholder.png" 
 
-def summarize_and_save(story,name,selected_api,format):
+def summarize_and_save(story,name,selected_api,format,session_id):
+    
+    
     
     if format == "Session summary":
+        session_id = generate_session_id()
+        story_dir = f"session/{session_id}"
+        os.makedirs(story_dir,exist_ok=True)
+        update_registry(name, session_id,format)
         gr.Info("Generating summary, it might take a minute")
         story_string = "\n\n".join(
             f"user: {user_msg}\nnarrator: {narrator_msg}"
             for user_msg, narrator_msg in story)
         output = GenerateText(summarize_for_future,story_string,selected_api,1000)
         print(output)
-        with open(f"stories/{name}.txt", "w+") as file:
+        with open(f"{story_dir}/{name}.txt", "w+") as file:
             file.write(output)
     
     elif format == "Full session":
+        story_dir = f"session/{session_id}"
+        os.makedirs(story_dir,exist_ok=True)
+        update_registry(name, session_id,format)
         story_json = json.dumps(story, indent=4)
-        with open(f"stories/{name}.json", "w+") as file:
+        with open(f"{story_dir}/{name}.json", "w+") as file:
             file.write(story_json)
     else:
         print("Incorrect format")
 
-    gr.Info(f"Story saved as story-{name}.{format} in stories folder")
+    gr.Info(f"Story saved as story-{name}.{'txt' if format=='Session summary' else 'json'} in stories folder")
 
-def load_story(name,format):
-    if format == "Session summary":
-        with open(f"stories/{name}.txt", "r") as file:
-            story = f"Story so far: {file.read()}"
-            return story, [(None,story)]
-    elif format == "Full session":
-        with open(f"stories/{name}.json", "r") as file:
-            story = json.load(file)
-            return "",story
+def load_story(session_id):
+    
+    try:
+        with open(SESSION_REGISTRY, "r") as f:
+            registry = json.load(f)
+
+        entry = next((e for e in registry if e['id'] == session_id), None)
+        print(entry)
+        print(entry['name'])
+        print(entry['id'])
+        if not entry:
+            raise gr.Error("Session not found")
+        
+        if not session_id:
+            raise gr.Error("Session not found")
+
+        session_path = f"session/{session_id}"
+        print(f"{session_path}/{entry['name']} {entry['format']}")
+        if entry['format'] == "Session summary":
+            with open(f"{session_path}/{entry['name']}.txt", "r") as file:
+                story = f"Story so far: {file.read()}"
+                print(story)
+                return story, [(None,story)], session_id
+            
+        elif entry['format'] == "Full session":
+            with open(f"{session_path}/{entry['name']}.json", "r") as file:
+                story = json.load(file)
+                print(story)
+                return "",story , session_id
+
+    except Exception as e:
+        raise gr.Error(f"Load failed: {str(e)}")
 
     
 
