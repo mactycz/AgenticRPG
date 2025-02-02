@@ -243,7 +243,6 @@ def load_story(session_id):
     try:
         with open(SESSION_REGISTRY, "r") as f:
             registry = json.load(f)
-
         entry = next((e for e in registry if e['id'] == session_id), None)
         print(entry)
         print(entry['name'])
@@ -269,8 +268,7 @@ def load_story(session_id):
                 return "",story , session_id
 
     except Exception as e:
-        raise gr.Error(f"Load failed: {str(e)}")
-
+        raise gr.Error(f"No saved session found: {str(e)}")
     
 
 

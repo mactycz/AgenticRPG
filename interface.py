@@ -72,7 +72,11 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
     load_story_button.click(
         fn=load_story,
         inputs=[saved_sessions],
-        outputs=[initialize_story_state,chat_story.chatbot,session_id])
+        outputs=[initialize_story_state,chat_story.chatbot,session_id]).then(
+        fn=add_key_and_show_interface,
+        inputs=[api_selection, api_auth_dropdown, api_value, llm_name, image_model_name],
+        outputs=[selection_interface, main_interface]
+)
     save_story_button.click(
         fn=summarize_and_save,
         inputs=[chat_story.chatbot,save_name,api_selection,save_option,session_id],
