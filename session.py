@@ -12,7 +12,7 @@ SESSION_REGISTRY = "sessions_registry.json"
 def generate_session_id():
     return str(uuid.uuid4())
 
-def update_registry(session_name, session_id, format):
+def update_registry(session_name, session_id, format, image_state):
     try:
         with open(SESSION_REGISTRY, "r") as f:
             registry = json.load(f)
@@ -24,7 +24,8 @@ def update_registry(session_name, session_id, format):
         "name": session_name,
         "id": session_id,
         "format": format,
-        "timestamp": datetime.datetime.now().isoformat()
+        "timestamp": datetime.datetime.now().isoformat(),
+        "image_state": image_state
     })
     with open(SESSION_REGISTRY, "w") as f:
         json.dump(registry, f , indent=2)
@@ -37,7 +38,7 @@ def get_saved_sessions():
     except (FileNotFoundError, json.JSONDecodeError):
         return []
     
-def summarize_and_save(story,name,selected_api,format,session_id):
+def summarize_and_save(story,name,selected_api,format,image_state,session_id):
     if format == "Session summary":
         session_id = generate_session_id()
         story_dir = f"session/{session_id}"
@@ -69,9 +70,6 @@ def load_story(session_id):
         with open(SESSION_REGISTRY, "r") as f:
             registry = json.load(f)
         entry = next((e for e in registry if e['id'] == session_id), None)
-        print(entry)
-        print(entry['name'])
-        print(entry['id'])
         if not entry:
             raise gr.Error("Session not found")
         
@@ -84,13 +82,13 @@ def load_story(session_id):
             with open(f"{session_path}/{entry['name']}.txt", "r") as file:
                 story = f"Story so far: {file.read()}"
                 print(story)
-                return story, [(None,story)], session_id
+                return story, [(None,story)], session_id, entry['image_state']
             
         elif entry['format'] == "Full session":
             with open(f"{session_path}/{entry['name']}.json", "r") as file:
                 story = json.load(file)
                 print(story)
-                return "",story , session_id
+                return "",story , session_id, entry['image_state']
 
     except Exception as e:
         raise gr.Error(f"No saved session found: {str(e)}")

@@ -142,7 +142,7 @@ def generate_text(system_prompt,user_story,selected_api,max_tokens=500):
     output = api_call(messages,selected_api=selected_api,temperature=0.7,max_tokens=max_tokens,system_message=system_prompt)
     return output
 
-def generate_image(story,selected_api,session_id,style=""):
+def generate_image(story,selected_api,session_id,image_state,style=""):
     story = story[-1][-1]
     prompt = generate_text(summarize_for_image,story,selected_api)
     if style != "":
@@ -153,9 +153,14 @@ def generate_image(story,selected_api,session_id,style=""):
     image_dir = f"session/{session_id}/images"
     os.makedirs(image_dir, exist_ok=True)
     image.save(f"{image_dir}/image-{date}.png")
-    return image
+    image_path = f"{image_dir}/image-{date}.png"
+    image_state["current_image"] = image
+    image_state["current_image_path"] = image_path
+    image_state["current_image_index"] += 1
+    image_state["image_count"] += 1
+    return image_path, image_state
 
-def conditional_generate_image(story,auto_generate,selected_api,session_id ,style=""):
+def conditional_generate_image(story,auto_generate,selected_api,session_id,image_state,style=""):
     if auto_generate:
         if story[-1][1] is not None:
             return generate_image(story,selected_api,session_id,style)
