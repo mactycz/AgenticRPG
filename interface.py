@@ -11,10 +11,17 @@ models_hf=[]
 api_key = ""
 api_token=""
 
+
 with gr.Blocks(fill_width=True,fill_height=True)as demo:
     initialize_story_state = gr.State(initialize_story)
     current_session_name = gr.State("")
     session_id = gr.State(generate_session_id())
+    image_state = gr.State({"current_image":None,
+                            "current_image_path":None,
+                            "current_image_index":0,
+                            "image_count":0
+                            })
+                            
     with gr.Column() as selection_interface:
         with gr.Group():
             gr.Markdown("<h4 style='text-align: center; margin: 0; padding: 5px;'>LLM Settings</h4>")
@@ -63,6 +70,10 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             with gr.Column():
                 change_api = gr.Button("Change API")
                 image= gr.Image(label="Image",height=600,)
+                with gr.Row():
+                    previous = gr.Button("←")
+                    counter = gr.Button(f"{image_state.value['current_image_index']}/{image_state.value['image_count']}")
+                    next = gr.Button("→")
                 image_button = gr.Button("Generate Image")
 
         with gr.Row():
