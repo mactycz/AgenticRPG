@@ -1,6 +1,7 @@
 import gradio as gr
 from app import *
 from prompts import *
+from session import *
 dropdown_options = ['Local','Huggingface API','OpenAI','Anthropic']
 dropdown_options_api = ['','API key', 'Enviromental variable token']
 default_keys = {'Local':'','Huggingface API':'HF_TOKEN','OpenAI':'OPENAI_API_KEY','Anthropic':'ANTHROPIC_API_KEY'}
@@ -52,7 +53,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         with gr.Row():
             with gr.Column():
                 chat_story = gr.ChatInterface(
-                fn=Chat,
+                fn=chat,
                 chatbot=gr.Chatbot(height=600,
                     value=[(None,initialize_story_state.value)]),
                     additional_inputs=[api_selection,
@@ -82,7 +83,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         inputs=[chat_story.chatbot,save_name,api_selection,save_option,session_id],
         outputs=None)
     image_button.click(
-        fn=GenerateImage,inputs=[chat_story.chatbot,api_selection,session_id,image_style],
+        fn=generate_image,inputs=[chat_story.chatbot,api_selection,session_id,image_style],
         outputs=image,api_name="generateImage")
     change_api.click(
         fn=add_key_and_show_interface,
