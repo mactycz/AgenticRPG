@@ -29,7 +29,6 @@ def update_placeholders(option,auth,keys):
     if auth=="Enviromental variable token":
         return gr.update(value=keys[option])
 
-
 def connect_to_api(api,auth,key,model_name_llm,model_name_image):
     global clientLLM
     global clientImage
@@ -57,8 +56,6 @@ def connect_to_api(api,auth,key,model_name_llm,model_name_image):
         clientImage=Client(model_name_image)
         print(f"MODELS LOADED {model_name_llm}, {model_name_image}")
 
-
-
     elif api =="OpenAI":
         from openai import OpenAI
         if auth=="API key":
@@ -74,9 +71,6 @@ def connect_to_api(api,auth,key,model_name_llm,model_name_image):
         clientLLM = OpenAI()
         clientImage = OpenAI()
         print("openai")
-
-
-
 
     elif api == "Anthropic":
         import anthropic
@@ -107,14 +101,10 @@ def connect_to_api(api,auth,key,model_name_llm,model_name_image):
         except Exception as e:
             print(f"Error loading local model: {str(e)}")
 
-
-
 def Client(model):
     from huggingface_hub import InferenceClient
     global client 
-    client= InferenceClient(
-        model
-    )
+    client= InferenceClient(model)
     return client
 
 def api_call(msgs,selected_api,temperature = 0.7, max_tokens= 2000 , system_message = localPromptStory):
@@ -125,7 +115,6 @@ def api_call(msgs,selected_api,temperature = 0.7, max_tokens= 2000 , system_mess
         "Local": lambda msgs: clientLLM.generate_response(msgs)
     }
     return api_call[selected_api](msgs)
-
 
 def chat(message,history,selected_api,abcd=False,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
     messages = [{"role": "system", "content": localPromptStory + (abcd_options if abcd else "")}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
@@ -145,12 +134,7 @@ def chat(message,history,selected_api,abcd=False,automatic_image=False): # the a
         output = api_call(messages,selected_api)
         #clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000)
         history.append((message,output))
-
-
     return output
-
-
-
 
 def generate_text(system_prompt,user_story,selected_api,max_tokens=500):
     messages = [{"role": "system", "content": system_prompt}] if selected_api != "Anthropic" else []

@@ -4,6 +4,9 @@ import json
 import gradio as gr
 import json
 import datetime
+import os
+from prompts import summarize_for_future
+from app import generate_text
 SESSION_REGISTRY = "sessions_registry.json"
 
 def generate_session_id():
@@ -35,9 +38,6 @@ def get_saved_sessions():
         return []
     
 def summarize_and_save(story,name,selected_api,format,session_id):
-    
-    
-    
     if format == "Session summary":
         session_id = generate_session_id()
         story_dir = f"session/{session_id}"
@@ -47,7 +47,7 @@ def summarize_and_save(story,name,selected_api,format,session_id):
         story_string = "\n\n".join(
             f"user: {user_msg}\nnarrator: {narrator_msg}"
             for user_msg, narrator_msg in story)
-        output = GenerateText(summarize_for_future,story_string,selected_api,1000)
+        output = generate_text(summarize_for_future,story_string,selected_api,1000)
         print(output)
         with open(f"{story_dir}/{name}.txt", "w+") as file:
             file.write(output)
@@ -65,7 +65,6 @@ def summarize_and_save(story,name,selected_api,format,session_id):
     gr.Info(f"Story saved as story-{name}.{'txt' if format=='Session summary' else 'json'} in stories folder")
 
 def load_story(session_id):
-    
     try:
         with open(SESSION_REGISTRY, "r") as f:
             registry = json.load(f)
