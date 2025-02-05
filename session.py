@@ -12,7 +12,7 @@ SESSION_REGISTRY = "sessions_registry.json"
 def generate_session_id():
     return str(uuid.uuid4())
 
-def update_registry(session_name, session_id, format):
+def update_registry(session_name, session_id, format, image_state):
     try:
         with open(SESSION_REGISTRY, "r") as f:
             registry = json.load(f)
@@ -24,7 +24,8 @@ def update_registry(session_name, session_id, format):
         "name": session_name,
         "id": session_id,
         "format": format,
-        "timestamp": datetime.datetime.now().isoformat()
+        "timestamp": datetime.datetime.now().isoformat(),
+        "image_state": image_state
     })
     with open(SESSION_REGISTRY, "w") as f:
         json.dump(registry, f , indent=2)
@@ -37,12 +38,12 @@ def get_saved_sessions():
     except (FileNotFoundError, json.JSONDecodeError):
         return []
     
-def summarize_and_save(story,name,selected_api,format,session_id):
+def summarize_and_save(story,name,selected_api,format,image_state,session_id):
     if format == "Session summary":
         session_id = generate_session_id()
-        story_dir = f"session/{session_id}"
+        story_dir = f"sessions/{session_id}"
         os.makedirs(story_dir,exist_ok=True)
-        update_registry(name, session_id,format)
+        update_registry(name, session_id,format,image_state)
         gr.Info("Generating summary, it might take a minute")
         story_string = "\n\n".join(
             f"user: {user_msg}\nnarrator: {narrator_msg}"
@@ -53,9 +54,9 @@ def summarize_and_save(story,name,selected_api,format,session_id):
             file.write(output)
     
     elif format == "Full session":
-        story_dir = f"session/{session_id}"
+        story_dir = f"sessions/{session_id}"
         os.makedirs(story_dir,exist_ok=True)
-        update_registry(name, session_id,format)
+        update_registry(name, session_id,format,image_state)
         story_json = json.dumps(story, indent=4)
         with open(f"{story_dir}/{name}.json", "w+") as file:
             file.write(story_json)
@@ -69,28 +70,25 @@ def load_story(session_id):
         with open(SESSION_REGISTRY, "r") as f:
             registry = json.load(f)
         entry = next((e for e in registry if e['id'] == session_id), None)
-        print(entry)
-        print(entry['name'])
-        print(entry['id'])
         if not entry:
             raise gr.Error("Session not found")
         
         if not session_id:
             raise gr.Error("Session not found")
 
-        session_path = f"session/{session_id}"
+        session_path = f"sessions/{session_id}"
         print(f"{session_path}/{entry['name']} {entry['format']}")
         if entry['format'] == "Session summary":
             with open(f"{session_path}/{entry['name']}.txt", "r") as file:
                 story = f"Story so far: {file.read()}"
                 print(story)
-                return story, [(None,story)], session_id
+                return story, [(None,story)], session_id, entry['image_state']
             
         elif entry['format'] == "Full session":
             with open(f"{session_path}/{entry['name']}.json", "r") as file:
                 story = json.load(file)
                 print(story)
-                return "",story , session_id
+                return "",story , session_id, entry['image_state']
 
     except Exception as e:
         raise gr.Error(f"No saved session found: {str(e)}")
