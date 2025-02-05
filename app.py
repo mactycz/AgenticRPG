@@ -143,12 +143,10 @@ def generate_text(system_prompt,user_story,selected_api,max_tokens=500):
     return output
 
 def generate_image(story,selected_api,session_id,image_state,style=""):
-    print("Image state: ",image_state)
     story = story[-1][-1]
     prompt = generate_text(summarize_for_image,story,selected_api)
     if style != "":
         prompt = prompt+ f' Generate the image in {style} style.'
-    print(f"Image prompt {prompt}")
     image= clientImage.text_to_image(prompt=prompt)
     date = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     image_dir = f"sessions/{session_id}/images"
@@ -156,7 +154,6 @@ def generate_image(story,selected_api,session_id,image_state,style=""):
     image.save(f"{image_dir}/image-{date}.png")
     image_path = f"{image_dir}/image-{date}.png"
     image_state = update_image_state(image_state,session_id,"Add",image_path)
-    print(image_path)
     return image_path, image_state
 
 def conditional_generate_image(story,auto_generate,selected_api,session_id,image_state,style=""):
@@ -169,40 +166,31 @@ def conditional_generate_image(story,auto_generate,selected_api,session_id,image
 def get_images(session_id):
     image_dir = f"sessions/{session_id}/images"
     images = sorted(os.listdir(image_dir))
-    print(images)
     return images
 
 def update_image_state(image_state,session_id,action,image_path=""):
-    print("CLICK")
     images  = get_images(session_id)
     if action == "Add":
         image_state["image_count"] += 1
         image_state["current_image_index"]  = image_state["image_count"]
         image_state["current_image_path"] = image_path
-        print(image_state)
         return image_state
     elif action == "previous":
-        print("State przed previous ",image_state)
         if image_state["current_image_index"] > 1:
             image_state["current_image_index"] -= 1
-            print(images[image_state["current_image_index"]]," ",image_state["current_image_index"])
             image_state["current_image_path"] = f"sessions/{session_id}/images/{images[image_state['current_image_index']-1]}"
-            print(image_state)
             return image_state
         else:
             return image_state
     elif action == "next":
         if image_state["current_image_index"] < image_state["image_count"]:
-            print("State przed next ",image_state)
             image_state["current_image_index"] += 1
             image_state["current_image_path"] = f"sessions/{session_id}/images/{images[image_state['current_image_index']-1]}"
-            print(image_state)
             return image_state
         else:
             return image_state
         
 
 def update_image(image_state):
-    print("Image state: ",image_state)
     return image_state['current_image_path'],f"{image_state['current_image_index']}/{image_state['image_count']}"
 
