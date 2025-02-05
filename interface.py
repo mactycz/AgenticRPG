@@ -15,9 +15,9 @@ api_token=""
 with gr.Blocks(fill_width=True,fill_height=True)as demo:
     initialize_story_state = gr.State(initialize_story)
     current_session_name = gr.State("")
-    session_id = gr.State(generate_session_id())
-    image_state = gr.State({"current_image":None,
-                            "current_image_path":None,
+    session_id = gr.State("")
+    image_state = gr.State({
+                            "current_image_path":"helpers/placeholder.png",
                             "current_image_index":0,
                             "image_count":0
                             })
@@ -69,7 +69,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
                 
             with gr.Column():
                 change_api = gr.Button("Change API")
-                image= gr.Image(label="Image",height=600,)
+                image= gr.Image(image_state.value["current_image_path"],label="Image",height=600,type='filepath')
                 with gr.Row():
                     previous = gr.Button("←")
                     counter = gr.Button(f"{image_state.value['current_image_index']}/{image_state.value['image_count']}")
@@ -84,18 +84,29 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
     load_story_button.click(
         fn=load_story,
         inputs=[saved_sessions],
-        outputs=[initialize_story_state,chat_story.chatbot,session_id,image_state]).then(
+        outputs=[initialize_story_state,chat_story.chatbot,session_id,image_state]
+        ).then(
         fn=add_key_and_show_interface,
         inputs=[api_selection, api_auth_dropdown, api_value, llm_name, image_model_name],
-        outputs=[selection_interface, main_interface])
+        outputs=[main_interface,selection_interface])
     
     save_story_button.click(
         fn=summarize_and_save,
         inputs=[chat_story.chatbot,save_name,api_selection,save_option,image_state,session_id],
         outputs=None)
     image_button.click(
-        fn=generate_image,inputs=[chat_story.chatbot,api_selection,session_id,image_style],
-        outputs=[image,image_state],api_name="generateImage")
+        fn=generate_image,inputs=[chat_story.chatbot,api_selection,session_id,image_state,image_style],
+        outputs=[image,image_state])
+    previous.click(
+        fn = lambda ist, sid : update_image_state(ist,sid,"previous"),
+        inputs=[image_state,session_id],
+        outputs=image_state)
+
+    next.click(
+        fn = lambda ist, sid : update_image_state(ist,sid,"next"),
+        inputs=[image_state,session_id],
+        outputs=image_state)
+
     change_api.click(
         fn=add_key_and_show_interface,
         inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],
@@ -103,11 +114,16 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
     api_key_button.click(
         fn=add_key_and_show_interface,
         inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],
-        outputs=[main_interface,selection_interface])
+        outputs=[main_interface,selection_interface]
+        ).then(fn = generate_session_id, outputs=session_id)
     chat_story.chatbot.change(
         fn=conditional_generate_image,
-        inputs=[chat_story.chatbot, chat_story.additional_inputs[2],api_selection,session_id,image_style],
-        outputs=image)
+        inputs=[chat_story.chatbot, chat_story.additional_inputs[2],api_selection,session_id,image_state,image_style],
+        outputs=[image,image_state])
+    image_state.change(
+        fn=update_image,
+        inputs=[image_state],
+        outputs=[image,counter])
 
 
 demo.launch()

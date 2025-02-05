@@ -41,9 +41,9 @@ def get_saved_sessions():
 def summarize_and_save(story,name,selected_api,format,image_state,session_id):
     if format == "Session summary":
         session_id = generate_session_id()
-        story_dir = f"session/{session_id}"
+        story_dir = f"sessions/{session_id}"
         os.makedirs(story_dir,exist_ok=True)
-        update_registry(name, session_id,format)
+        update_registry(name, session_id,format,image_state)
         gr.Info("Generating summary, it might take a minute")
         story_string = "\n\n".join(
             f"user: {user_msg}\nnarrator: {narrator_msg}"
@@ -54,9 +54,9 @@ def summarize_and_save(story,name,selected_api,format,image_state,session_id):
             file.write(output)
     
     elif format == "Full session":
-        story_dir = f"session/{session_id}"
+        story_dir = f"sessions/{session_id}"
         os.makedirs(story_dir,exist_ok=True)
-        update_registry(name, session_id,format)
+        update_registry(name, session_id,format,image_state)
         story_json = json.dumps(story, indent=4)
         with open(f"{story_dir}/{name}.json", "w+") as file:
             file.write(story_json)
@@ -76,7 +76,7 @@ def load_story(session_id):
         if not session_id:
             raise gr.Error("Session not found")
 
-        session_path = f"session/{session_id}"
+        session_path = f"sessions/{session_id}"
         print(f"{session_path}/{entry['name']} {entry['format']}")
         if entry['format'] == "Session summary":
             with open(f"{session_path}/{entry['name']}.txt", "r") as file:
