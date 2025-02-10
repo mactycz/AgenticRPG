@@ -26,9 +26,12 @@ def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,m
         return gr.update(visible=True),gr.update(visible=False)
     return gr.update(visible=False),gr.update(visible=True)
 
-def update_placeholders(option,auth,keys):
+def update_placeholders(option,auth,keys,model_list,default_models):
     if auth=="Enviromental variable token":
-        return gr.update(value=keys[option])
+        return gr.update(value=keys[option]),gr.update(choices = model_list[option]),gr.update(value=default_models[option])
+    else:
+        return gr.update(value=""),gr.update(choices = model_list[option]),gr.update(value=default_models[option])
+    
 
 def connect_to_api(api,auth,key,model_name_llm,model_name_image,provider=""):
     global clientLLM

@@ -8,6 +8,8 @@ default_keys = {'Local':'','Huggingface API':'HF_TOKEN','OpenAI':'OPENAI_API_KEY
 models_openai=["gpt-4o","chatgpt-4o-latest","gpt-4o-mini","o1","o1-mini","o3-mini","o1-preview"]
 models_anthropic=["claude-3-5-sonnet-latest","claude-3-5-haiku-latest","claude-3-opus-latest","claude-3-sonnet-20240229","claude-3-haiku-20240307"]
 models_hf=[]
+model_lists = {'Local':'','Huggingface API':models_hf,'OpenAI':models_openai,'Anthropic':models_anthropic}
+default_models = {'Local':'','Huggingface API':'meta-llama/Llama-3.1-8B-Instruct','OpenAI':'gpt-4o','Anthropic':'claude-3-5-sonnet-latest'}
 api_key = ""
 api_token=""
 
@@ -30,7 +32,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
                 api_auth_dropdown= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
                 api_value = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
             with gr.Row():
-                llm_name= gr.Textbox(label="Model name", interactive=True,value="meta-llama/Llama-3.1-8B-Instruct")
+                llm_name= gr.Dropdown(label="Model name", interactive=True,allow_custom_value=True,value="meta-llama/Llama-3.1-8B-Instruct",choices=model_lists["Huggingface API"])
                 provider_llm = gr.Textbox(label="provider",interactive=True)
                 temperature = gr.Number(label="Temperature",interactive=True,value=0.7)
             
@@ -56,8 +58,8 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             with gr.Row():
                 load_story_button = gr.Button("Load story", interactive=True)
         
-        api_auth_dropdown.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
-        api_selection.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys)],outputs=api_value)
+        api_auth_dropdown.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys),gr.State(model_lists),gr.State(default_models)],outputs=[api_value,llm_name,llm_name])
+        api_selection.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys),gr.State(model_lists),gr.State(default_models)],outputs=[api_value,llm_name,llm_name])
 
     with gr.Column(visible=False) as main_interface:
         with gr.Row():
