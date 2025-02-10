@@ -2,7 +2,8 @@ import gradio as gr
 from app import *
 from prompts import *
 from session import *
-dropdown_options = ['Local','Huggingface API','OpenAI','Anthropic']
+dropdown_options_llm = ['Local','Huggingface API','OpenAI','Anthropic']
+dropdown_options_image = ['Local','Huggingface API','OpenAI']
 dropdown_options_api = ['','API key', 'Enviromental variable token']
 default_keys = {'Local':'','Huggingface API':'HF_TOKEN','OpenAI':'OPENAI_API_KEY','Anthropic':'ANTHROPIC_API_KEY'}
 models_openai=["gpt-4o","chatgpt-4o-latest","gpt-4o-mini","o1","o1-mini","o3-mini","o1-preview"]
@@ -28,9 +29,9 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         with gr.Group():
             gr.Markdown("<h4 style='text-align: center; margin: 0; padding: 5px;'>LLM Settings</h4>")
             with gr.Row():
-                api_selection = gr.Dropdown(choices=dropdown_options, label="Select API", interactive=True,value="Huggingface API")
+                api_selection = gr.Dropdown(choices=dropdown_options_llm, label="Select API", interactive=True,value="Huggingface API")
                 api_auth_dropdown= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
-                api_value = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
+                api_key_value = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
             with gr.Row():
                 llm_name= gr.Dropdown(label="Model name", interactive=True,allow_custom_value=True,value="meta-llama/Llama-3.1-8B-Instruct",choices=model_lists["Huggingface API"])
                 provider_llm = gr.Textbox(label="provider",interactive=True)
@@ -40,7 +41,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         with gr.Group():
             gr.Markdown("<h4 style='text-align: center; margin: 0; padding: 5px;'>Image model Settings</h4>")
             with gr.Row():
-                api_selection_image = gr.Dropdown(choices=dropdown_options, label="Select API", interactive=True,value="Huggingface API")
+                api_selection_image = gr.Dropdown(choices=dropdown_options_image, label="Select API", interactive=True,value="Huggingface API")
                 api_auth_dropdown_image= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
                 api_value_image = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
             with gr.Row():
@@ -58,9 +59,10 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             with gr.Row():
                 load_story_button = gr.Button("Load story", interactive=True)
         
-        api_auth_dropdown.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys),gr.State(model_lists),gr.State(default_models)],outputs=[api_value,llm_name,llm_name])
-        api_selection.change(fn=update_placeholders, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys),gr.State(model_lists),gr.State(default_models)],outputs=[api_value,llm_name,llm_name])
+        api_auth_dropdown.change(fn=update_placeholders_llm, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys),gr.State(model_lists),gr.State(default_models)],outputs=[api_key_value,llm_name,llm_name])
+        api_selection.change(fn=update_placeholders_llm, inputs=[api_selection,api_auth_dropdown,gr.State(default_keys),gr.State(model_lists),gr.State(default_models)],outputs=[api_key_value,llm_name,llm_name])
 
+        
     with gr.Column(visible=False) as main_interface:
         with gr.Row():
             with gr.Column():
@@ -92,7 +94,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         outputs=[initialize_story_state,chat_story.chatbot,session_id,image_state]
         ).then(
         fn=add_key_and_show_interface,
-        inputs=[api_selection, api_auth_dropdown, api_value, llm_name, model_name_image, provider_llm],
+        inputs=[api_selection, api_auth_dropdown, api_key_value, llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_value_image, provider_image],
         outputs=[main_interface,selection_interface])
     
     save_story_button.click(
@@ -114,16 +116,16 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
 
     change_api.click(
         fn=add_key_and_show_interface,
-        inputs=[api_selection,api_auth_dropdown,api_value,llm_name, provider_llm],
+        inputs=[api_selection,api_auth_dropdown,api_key_value,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_value_image, provider_image],
         outputs=[selection_interface,main_interface])
     api_key_button.click(
         fn=add_key_and_show_interface,
-        inputs=[api_selection,api_auth_dropdown,api_value,llm_name, provider_llm],
+        inputs=[api_selection,api_auth_dropdown,api_key_value,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_value_image, provider_image],
         outputs=[main_interface,selection_interface]
         ).then(fn = generate_session_id, outputs=session_id)
     chat_story.chatbot.change(
         fn=conditional_generate_image,
-        inputs=[chat_story.chatbot, chat_story.additional_inputs[2],api_selection,api_selection_image,session_id,image_state,llm_name,model_name_image,temperature,image_style],
+        inputs=[chat_story.chatbot, chat_story.additional_inputs[4],api_selection,api_selection_image,session_id,image_state,llm_name,model_name_image,temperature,image_style],
         outputs=[image,image_state])
     image_state.change(
         fn=update_image,
