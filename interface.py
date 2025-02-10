@@ -44,7 +44,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
                 api_auth_dropdown_image= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
                 api_value_image = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
             with gr.Row():
-                image_model_name = gr.Textbox(label="Image model name", interactive=True,value="stabilityai/stable-diffusion-3.5-large-turbo")
+                model_name_image = gr.Textbox(label="Image model name", interactive=True,value="stabilityai/stable-diffusion-3.5-large-turbo")
                 image_style = gr.Textbox(label="Image style",interactive=True)
                 provider_image = gr.Textbox(label="provider",interactive=True)
         api_key_button = gr.Button("New session")
@@ -92,7 +92,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         outputs=[initialize_story_state,chat_story.chatbot,session_id,image_state]
         ).then(
         fn=add_key_and_show_interface,
-        inputs=[api_selection, api_auth_dropdown, api_value, llm_name, image_model_name, provider_llm],
+        inputs=[api_selection, api_auth_dropdown, api_value, llm_name, model_name_image, provider_llm],
         outputs=[main_interface,selection_interface])
     
     save_story_button.click(
@@ -100,7 +100,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         inputs=[chat_story.chatbot,save_name,api_selection,save_option,image_state,session_id],
         outputs=None)
     image_button.click(
-        fn=generate_image,inputs=[chat_story.chatbot,api_selection,session_id,image_state,llm_name,temperature,image_style],
+        fn=generate_image,inputs=[chat_story.chatbot,api_selection,api_selection_image,session_id,image_state,llm_name,model_name_image,temperature,image_style],
         outputs=[image,image_state])
     previous.click(
         fn = lambda ist, sid : update_image_state(ist,sid,"previous"),
@@ -123,7 +123,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         ).then(fn = generate_session_id, outputs=session_id)
     chat_story.chatbot.change(
         fn=conditional_generate_image,
-        inputs=[chat_story.chatbot, chat_story.additional_inputs[2],api_selection,session_id,image_state,llm_name,temperature,image_style],
+        inputs=[chat_story.chatbot, chat_story.additional_inputs[2],api_selection,api_selection_image,session_id,image_state,llm_name,model_name_image,temperature,image_style],
         outputs=[image,image_state])
     image_state.change(
         fn=update_image,

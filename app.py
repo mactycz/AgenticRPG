@@ -75,6 +75,13 @@ def api_call(msgs,selected_api, model_name, temperature = 0.7, max_tokens= 2000 
     }
     return api_call[selected_api](msgs)
 
+def api_call_image(prompt,selected_api,model):
+    api_call = {
+        "OpenAI" : lambda prompt: OpenAI.images.generate({prompt:prompt,model:model}),
+        "Huggingface" : lambda prompt : clientImage.text_to_image(prompt=prompt)
+    }
+    return api_call[selected_api](prompt)
+
 def chat(message,history,selected_api,model_name,temperature,abcd=False,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
     messages = [{"role": "system", "content": localPromptStory + (abcd_options if abcd else "")}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
     if len(history) == 1:
@@ -99,12 +106,12 @@ def generate_text(system_prompt,user_story,model_name,selected_api,temperature,m
     output = api_call(messages,selected_api,model_name,temperature=temperature,max_tokens=max_tokens,system_message=system_prompt)
     return output
 
-def generate_image(story,selected_api,session_id,image_state,model_name,temperature,style=""):
+def generate_image(story,selected_api_llm,selected_api_image,session_id,image_state,model_name_llm,model_name_image,temperature,style=""):
     story = story[-1][-1]
-    prompt = generate_text(summarize_for_image,story,model_name,selected_api,temperature)
+    prompt = generate_text(summarize_for_image,story,model_name_llm,selected_api_llm,temperature)
     if style != "":
         prompt = prompt+ f' Generate the image in {style} style.'
-    image= clientImage.text_to_image(prompt=prompt)
+    image= api_call_image[selected_api_image](prompt,model_name_image)
     date = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     image_dir = f"sessions/{session_id}/images"
     os.makedirs(image_dir, exist_ok=True)
@@ -113,9 +120,9 @@ def generate_image(story,selected_api,session_id,image_state,model_name,temperat
     image_state = update_image_state(image_state,session_id,"Add",image_path)
     return image_path, image_state
 
-def conditional_generate_image(story,auto_generate,selected_api,session_id,image_state,model_name,temperature,style=""):
+def conditional_generate_image(story,auto_generate,selected_api_llm,selected_api_image,session_id,image_state,model_name_llm,model_name_image,temperature,style=""):
     if auto_generate and story and story[-1][1] is not None:
-        return generate_image(story,selected_api,session_id,image_state,model_name,temperature,style)
+        return generate_image(story,selected_api_llm,selected_api_image,session_id,image_state,model_name_llm,model_name_image,temperature,style)
     else :
         return image_state["current_image_path"],image_state
 
