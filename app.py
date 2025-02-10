@@ -11,7 +11,6 @@ clientLLM = None
 clientImage = None
 
 def add_key_and_show_interface(api_llm,auth_llm, provided_api_key_llm,model_name_llm,provider_llm,api_image,auth_image, provided_api_key_image_image,provider_image):
-    global api_key
     if provided_api_key_llm=="":
         gr.Info("Please provide an API key").update(visible=True)
         return gr.update(visible=False),gr.update(visible=True)
@@ -19,8 +18,8 @@ def add_key_and_show_interface(api_llm,auth_llm, provided_api_key_llm,model_name
         provided_api_key_llm = os.environ.get(provided_api_key_llm)
     if auth_image == "Enviromental variable token":
         provided_api_key_image_image = os.environ.get(provided_api_key_image_image)
-    clientLLM = connect_to_api_llm(api_llm,auth_llm,provided_api_key_llm,model_name_llm,provider_llm)
-    clientImage = connect_to_api_image(api_image,auth_image,provided_api_key_image_image,provider_image)
+    connect_to_api_llm(api_llm,provided_api_key_llm,model_name_llm,provider_llm)
+    connect_to_api_image(api_image,provided_api_key_image_image,provider_image)
     return gr.update(visible=True),gr.update(visible=False)
     
 
@@ -30,12 +29,15 @@ def update_placeholders_llm(option,auth,keys,model_list,default_models):
     else:
         return gr.update(value=""),gr.update(choices = model_list[option]),gr.update(value=default_models[option])
     
+def update_placeholders_image(option,auth,keys,model_list):
+    if auth=="Enviromental variable token":
+        return gr.update(value=keys[option]),gr.update(value=model_list[option])
+    else:
+        return gr.update(value=""),gr.update(value=model_list[option])
 
-def connect_to_api_llm(api,auth,key,model_name,provider=""):
+
+def connect_to_api_llm(api,key,model_name,provider=""):
     global clientLLM
-    print(key)
-    if auth == "Enviromental variable token":
-        key = os.environ.get(key)
     if api == "Huggingface API":
         if provider=="" or provider == "HF Inference API":
             base_url = "https://router.huggingface.co/hf-inference/v1"
@@ -59,12 +61,9 @@ def connect_to_api_llm(api,auth,key,model_name,provider=""):
             print(f"Local model loaded: {model_name}")
         except Exception as e:
             print(f"Error loading local model: {str(e)}")
-    print(clientLLM)
 
 def connect_to_api_image(api,auth,key,provider=""):
     global clientImage
-    if auth == "Enviromental variable token":
-        key = os.environ.get(key)
     if api == "Huggingface API":
         from huggingface_hub import InferenceClient
         clientImage = InferenceClient(
