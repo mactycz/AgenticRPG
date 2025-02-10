@@ -114,11 +114,11 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
 
     change_api.click(
         fn=add_key_and_show_interface,
-        inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name, provider_llm],
+        inputs=[api_selection,api_auth_dropdown,api_value,llm_name, provider_llm],
         outputs=[selection_interface,main_interface])
     api_key_button.click(
         fn=add_key_and_show_interface,
-        inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name, provider_llm],
+        inputs=[api_selection,api_auth_dropdown,api_value,llm_name, provider_llm],
         outputs=[main_interface,selection_interface]
         ).then(fn = generate_session_id, outputs=session_id)
     chat_story.chatbot.change(

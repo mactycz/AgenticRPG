@@ -10,7 +10,7 @@ import anthropic
 clientLLM = None
 clientImage = None
 
-def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,model_name_llm, model_name_image,provider):
+def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,model_name_llm,provider):
     global api_key, api_token
     if provided_api_key:
         api_key = provided_api_key
@@ -19,7 +19,7 @@ def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,m
     else:
         api_key = ""
     print(api_choice,provided_api_key,provided_api_token)
-    connect_to_api(api_choice,provided_api_key,provided_api_token,model_name_llm,model_name_image,provider)
+    connect_to_api(api_choice,provided_api_key,provided_api_token,model_name_llm,provider)
     if provided_api_key:
         return gr.update(visible=True),gr.update(visible=False)
     if provided_api_token:
@@ -33,9 +33,8 @@ def update_placeholders(option,auth,keys,model_list,default_models):
         return gr.update(value=""),gr.update(choices = model_list[option]),gr.update(value=default_models[option])
     
 
-def connect_to_api(api,auth,key,model_name_llm,model_name_image,provider=""):
+def connect_to_api(api,auth,key,model_name_llm,provider=""):
     global clientLLM
-    global clientImage
     if auth == "Enviromental variable token":
         key = os.environ.get(key)
     if api == "Huggingface API":
@@ -49,7 +48,6 @@ def connect_to_api(api,auth,key,model_name_llm,model_name_image,provider=""):
             api_key=key)
     elif api =="OpenAI":
         clientLLM = OpenAI()
-        clientImage = OpenAI()
 
     elif api == "Anthropic":
         clientLLM = anthropic.Anthropic(api_key=key)
