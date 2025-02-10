@@ -62,9 +62,10 @@ def connect_to_api_llm(api,key,model_name,provider=""):
         except Exception as e:
             print(f"Error loading local model: {str(e)}")
 
-def connect_to_api_image(api,auth,key,provider=""):
+def connect_to_api_image(api,key,provider=""):
     global clientImage
     if api == "Huggingface API":
+        provider = provider if provider != "" else "hf-inference"
         from huggingface_hub import InferenceClient
         clientImage = InferenceClient(
             provider=provider,
@@ -87,7 +88,7 @@ def api_call_llm(msgs,selected_api, model_name, temperature = 0.7, max_tokens= 2
 def api_call_image(prompt,selected_api,model):
     api_call = {
         "OpenAI" : lambda prompt: OpenAI.images.generate({prompt:prompt,model:model}),
-        "Huggingface" : lambda prompt : clientImage.text_to_image(prompt=prompt,model=model)
+        "Huggingface API" : lambda prompt : clientImage.text_to_image(prompt=prompt,model=model)
     }
     return api_call[selected_api](prompt)
 
@@ -120,7 +121,7 @@ def generate_image(story,selected_api_llm,selected_api_image,session_id,image_st
     prompt = generate_text(summarize_for_image,story,model_name_llm,selected_api_llm,temperature)
     if style != "":
         prompt = prompt+ f' Generate the image in {style} style.'
-    image= api_call_image[selected_api_image](prompt,model_name_image)
+    image= api_call_image(prompt,selected_api_image,model_name_image)
     date = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     image_dir = f"sessions/{session_id}/images"
     os.makedirs(image_dir, exist_ok=True)
