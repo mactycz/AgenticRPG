@@ -5,11 +5,12 @@ import os
 from prompts import *
 from PIL import Image
 import datetime
-
+from openai import OpenAI
+import anthropic
 clientLLM = None
 clientImage = None
 
-def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,model_name_llm, model_name_image):
+def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,model_name_llm, model_name_image,provider):
     global api_key, api_token
     if provided_api_key:
         api_key = provided_api_key
@@ -18,7 +19,7 @@ def add_key_and_show_interface(api_choice, provided_api_key,provided_api_token,m
     else:
         api_key = ""
     print(api_choice,provided_api_key,provided_api_token)
-    connect_to_api(api_choice,provided_api_key,provided_api_token,model_name_llm,model_name_image)
+    connect_to_api(api_choice,provided_api_key,provided_api_token,model_name_llm,model_name_image,provider)
     if provided_api_key:
         return gr.update(visible=True),gr.update(visible=False)
     if provided_api_token:
@@ -29,66 +30,28 @@ def update_placeholders(option,auth,keys):
     if auth=="Enviromental variable token":
         return gr.update(value=keys[option])
 
-def connect_to_api(api,auth,key,model_name_llm,model_name_image):
+def connect_to_api(api,auth,key,model_name_llm,model_name_image,provider=""):
     global clientLLM
     global clientImage
-    print("Trying connection")
-    if key=="":
-        print("No key provided")
-    if api=="Huggingface API":
-        from huggingface_hub import login
-        if auth=="API key":
-            print("Provided api key")
-            try:
-                login(api_key)
-            except:
-                print("invalid api key")
-        elif auth=="Enviromental variable token":
-            print("Token provided: "+key)
-            try:
-                token = os.environ.get(key)
-                login(token)
-            except:
-                print("invalid token or token name")
-        elif token=="" and api_key=="":
-            print("No auth method provided. This shouldn't be possible")
-        clientLLM=Client(model_name_llm)
-        clientImage=Client(model_name_image)
-        print(f"MODELS LOADED {model_name_llm}, {model_name_image}")
-
+    if auth == "Enviromental variable token":
+        key = os.environ.get(key)
+    if api == "Huggingface API":
+        print("HF")
+        if provider=="" or provider == "HF Inference API":
+            base_url = "https://router.huggingface.co/hf-inference/v1"
+        else:
+            base_url = f"https://router.huggingface.co/{provider}"
+        clientLLM = OpenAI(
+            base_url=base_url,
+            api_key=key)
     elif api =="OpenAI":
-        from openai import OpenAI
-        if auth=="API key":
-            print("Provided api key")
-            try:
-                OpenAI.api_key = api_key
-            except:
-                print("invalid api key")
-        elif auth=="Enviromental variable token":
-            print("Token provided: "+key)
-        elif token=="" and api_key=="":
-            print("No auth method provided. This shouldn't be possible")
         clientLLM = OpenAI()
         clientImage = OpenAI()
-        print("openai")
 
     elif api == "Anthropic":
-        import anthropic
-        if auth=="API key":
-            print("Provided api key")
-            try:
-                OpenAI.api_key = api_key
-            except:
-                print("invalid api key")
-        elif auth=="Enviromental variable token":
-            print("Token provided: "+key)
-        elif token=="" and api_key=="":
-            print("No auth method provided. This shouldn't be possible")
-        clientLLM = anthropic.Anthropic()
-        print("anth")
+        clientLLM = anthropic.Anthropic(api_key=key)
 
     elif api == "Local":
-        print("local")
         try:
             if "gguf" in model_name_llm:
                 print("llama")
@@ -97,32 +60,26 @@ def connect_to_api(api,auth,key,model_name_llm,model_name_image):
                 print("transformers")
                 clientLLM = LocalTransformersClient(model_name_llm)
             print(f"Local model loaded: {model_name_llm}")
-
         except Exception as e:
             print(f"Error loading local model: {str(e)}")
 
-def Client(model):
-    from huggingface_hub import InferenceClient
-    global client 
-    client= InferenceClient(model)
-    return client
+    print(clientLLM)
 
-def api_call(msgs,selected_api,temperature = 0.7, max_tokens= 2000 , system_message = localPromptStory):
+def api_call(msgs,selected_api, model_name, temperature = 0.7, max_tokens= 2000 , system_message = localPromptStory):
     api_call={
-        "Huggingface API": lambda msgs:clientLLM.chat.completions.create(msgs,temperature=temperature,max_tokens=max_tokens).choices[0]["message"]["content"],
-        "OpenAI": lambda msgs: clientLLM.chat.completions.create(model="gpt-4o-mini",messages=msgs, temperature=temperature, max_tokens=max_tokens).choices[0].message.content,
-        "Anthropic": lambda msgs: clientLLM.messages.create(model="claude-3-5-sonnet-20241022",messages=msgs, temperature=temperature, max_tokens=max_tokens,system=system_message).content[0].text,
+        "Huggingface API": lambda msgs:clientLLM.chat.completions.create(messages=msgs,model = model_name,temperature=temperature,max_tokens=max_tokens).choices[0].message.content,
+        "OpenAI": lambda msgs: clientLLM.chat.completions.create(model=model_name,messages=msgs, temperature=temperature, max_tokens=max_tokens).choices[0].message.content,
+        "Anthropic": lambda msgs: clientLLM.messages.create(model=model_name,messages=msgs, temperature=temperature, max_tokens=max_tokens,system=system_message).content[0].text,
         "Local": lambda msgs: clientLLM.generate_response(msgs)
     }
     return api_call[selected_api](msgs)
 
-def chat(message,history,selected_api,abcd=False,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
+def chat(message,history,selected_api,model_name,temperature,abcd=False,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
     messages = [{"role": "system", "content": localPromptStory + (abcd_options if abcd else "")}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
     if len(history) == 1:
         messages.append({"role": "assistant", "content": initialize_story})
         messages.append({"role": "user", "content": localPromptStory+message})
-        output = api_call(messages,selected_api)
-        #clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000).choices[0]["message"]["content"]
+        output = api_call(messages,selected_api,model_name,temperature)
         history.append([None,localPromptStory+message])
         history.append([localPromptStory+message,output])
     else:
@@ -131,20 +88,19 @@ def chat(message,history,selected_api,abcd=False,automatic_image=False): # the a
                 messages.append({"role": "user", "content": user_msg})
             messages.append({"role": "assistant", "content": bot_msg})
         messages.append({"role": "user", "content": message})
-        output = api_call(messages,selected_api)
-        #clientLLM.chat_completion(messages,temperature=0.7,max_tokens=2000)
+        output = api_call(messages,selected_api,model_name,temperature)
         history.append((message,output))
     return output
 
-def generate_text(system_prompt,user_story,selected_api,max_tokens=500):
+def generate_text(system_prompt,user_story,model_name,selected_api,temperature,max_tokens=500):
     messages = [{"role": "system", "content": system_prompt}] if selected_api != "Anthropic" else []
     messages.append({"role": "user", "content": user_story + " Story:"})
-    output = api_call(messages,selected_api=selected_api,temperature=0.7,max_tokens=max_tokens,system_message=system_prompt)
+    output = api_call(messages,selected_api,model_name,temperature=temperature,max_tokens=max_tokens,system_message=system_prompt)
     return output
 
-def generate_image(story,selected_api,session_id,image_state,style=""):
+def generate_image(story,selected_api,session_id,image_state,model_name,temperature,style=""):
     story = story[-1][-1]
-    prompt = generate_text(summarize_for_image,story,selected_api)
+    prompt = generate_text(summarize_for_image,story,model_name,selected_api,temperature)
     if style != "":
         prompt = prompt+ f' Generate the image in {style} style.'
     image= clientImage.text_to_image(prompt=prompt)
@@ -156,9 +112,9 @@ def generate_image(story,selected_api,session_id,image_state,style=""):
     image_state = update_image_state(image_state,session_id,"Add",image_path)
     return image_path, image_state
 
-def conditional_generate_image(story,auto_generate,selected_api,session_id,image_state,style=""):
+def conditional_generate_image(story,auto_generate,selected_api,session_id,image_state,model_name,temperature,style=""):
     if auto_generate and story and story[-1][1] is not None:
-        return generate_image(story,selected_api,session_id,image_state,style)
+        return generate_image(story,selected_api,session_id,image_state,model_name,temperature,style)
     else :
         return image_state["current_image_path"],image_state
 

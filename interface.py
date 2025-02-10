@@ -31,6 +31,8 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
                 api_value = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
             with gr.Row():
                 llm_name= gr.Textbox(label="Model name", interactive=True,value="meta-llama/Llama-3.1-8B-Instruct")
+                provider = gr.Textbox(label="provider",interactive=True)
+                temperature = gr.Number(label="Temperature",interactive=True,value=0.7)
             
 
         with gr.Group():
@@ -63,7 +65,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
                 fn=chat,
                 chatbot=gr.Chatbot(height=600,
                     value=[(None,initialize_story_state.value)]),
-                    additional_inputs=[api_selection,
+                    additional_inputs=[api_selection,llm_name,temperature,
                         gr.Checkbox(label="Use ABCD options"),
                         gr.Checkbox(label ="Automatically generate an image")])
                 
@@ -87,7 +89,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         outputs=[initialize_story_state,chat_story.chatbot,session_id,image_state]
         ).then(
         fn=add_key_and_show_interface,
-        inputs=[api_selection, api_auth_dropdown, api_value, llm_name, image_model_name],
+        inputs=[api_selection, api_auth_dropdown, api_value, llm_name, image_model_name, provider],
         outputs=[main_interface,selection_interface])
     
     save_story_button.click(
@@ -95,7 +97,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         inputs=[chat_story.chatbot,save_name,api_selection,save_option,image_state,session_id],
         outputs=None)
     image_button.click(
-        fn=generate_image,inputs=[chat_story.chatbot,api_selection,session_id,image_state,image_style],
+        fn=generate_image,inputs=[chat_story.chatbot,api_selection,session_id,image_state,llm_name,temperature,image_style],
         outputs=[image,image_state])
     previous.click(
         fn = lambda ist, sid : update_image_state(ist,sid,"previous"),
@@ -109,16 +111,16 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
 
     change_api.click(
         fn=add_key_and_show_interface,
-        inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],
+        inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name, provider],
         outputs=[selection_interface,main_interface])
     api_key_button.click(
         fn=add_key_and_show_interface,
-        inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name],
+        inputs=[api_selection,api_auth_dropdown,api_value,llm_name,image_model_name, provider],
         outputs=[main_interface,selection_interface]
         ).then(fn = generate_session_id, outputs=session_id)
     chat_story.chatbot.change(
         fn=conditional_generate_image,
-        inputs=[chat_story.chatbot, chat_story.additional_inputs[2],api_selection,session_id,image_state,image_style],
+        inputs=[chat_story.chatbot, chat_story.additional_inputs[2],api_selection,session_id,image_state,llm_name,temperature,image_style],
         outputs=[image,image_state])
     image_state.change(
         fn=update_image,
