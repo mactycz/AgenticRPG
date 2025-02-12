@@ -6,7 +6,9 @@ from prompts import *
 from PIL import Image
 import datetime
 from openai import OpenAI
+from io import BytesIO
 import anthropic
+import requests
 clientLLM = None
 clientImage = None
 
@@ -84,13 +86,22 @@ def api_call_llm(msgs,selected_api, model_name, temperature = 0.7, max_tokens= 2
         "Local": lambda msgs: clientLLM.generate_response(msgs)
     }
     return api_call[selected_api](msgs)
-
 def api_call_image(prompt,selected_api,model):
     api_call = {
-        "OpenAI" : lambda prompt: OpenAI.images.generate({prompt:prompt,model:model}),
+        "OpenAI" : lambda prompt: clientImage.images.generate(prompt=prompt,model=model,),
         "Huggingface API" : lambda prompt : clientImage.text_to_image(prompt=prompt,model=model)
     }
-    return api_call[selected_api](prompt)
+    image = api_call[selected_api](prompt)
+    if selected_api == "OpenAI":
+        image_url = image.data[0].url
+        image_response = requests.get(image_url)
+        if image_response.status_code == 200:
+            return Image.open(BytesIO(image_response.content))
+        else:
+            raise Exception("Failed to download OpenAI image")
+
+    return image
+
 
 def chat(message,history,selected_api,model_name,temperature,abcd=False,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
     messages = [{"role": "system", "content": localPromptStory + (abcd_options if abcd else "")}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
