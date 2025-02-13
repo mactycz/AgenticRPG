@@ -2,15 +2,15 @@ import gradio as gr
 from app import *
 from prompts import *
 from session import *
-dropdown_options_llm = ['Local','Huggingface API','OpenAI','Anthropic']
+dropdown_options_llm = ['Local','Huggingface API','OpenAI','Anthropic','OpenRouter']
 dropdown_options_image = ['Local','Huggingface API','OpenAI']
 dropdown_options_api = ['','API key', 'Enviromental variable token']
-default_keys = {'Local':'','Huggingface API':'HF_TOKEN','OpenAI':'OPENAI_API_KEY','Anthropic':'ANTHROPIC_API_KEY'}
+default_keys = {'Local':'','Huggingface API':'HF_API_KEY','OpenAI':'OPENAI_API_KEY','Anthropic':'ANTHROPIC_API_KEY','OpenRouter':'OPENROUTER_API_KEY'}
 models_openai=["gpt-4o","chatgpt-4o-latest","gpt-4o-mini","o1","o1-mini","o3-mini","o1-preview"]
 models_anthropic=["claude-3-5-sonnet-latest","claude-3-5-haiku-latest","claude-3-opus-latest","claude-3-sonnet-20240229","claude-3-haiku-20240307"]
 models_hf=[]
-model_lists = {'Local':'','Huggingface API':models_hf,'OpenAI':models_openai,'Anthropic':models_anthropic}
-default_models_llm = {'Local':'','Huggingface API':'meta-llama/Llama-3.1-8B-Instruct','OpenAI':'gpt-4o','Anthropic':'claude-3-5-sonnet-latest'}
+model_lists = {'Local':'','Huggingface API':models_hf,'OpenAI':models_openai,'Anthropic':models_anthropic,'OpenRouter': models_hf}
+default_models_llm = {'Local':'','Huggingface API':'meta-llama/Llama-3.1-8B-Instruct','OpenAI':'gpt-4o','Anthropic':'claude-3-5-sonnet-latest','OpenRouter':'deepseek/deepseek-chat'}
 default_models_image = {'Local':'','Huggingface API':'stabilityai/stable-diffusion-3.5-large-turbo','OpenAI':'dall-e-3'}
 api_key = ""
 api_token=""
@@ -32,7 +32,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             with gr.Row():
                 api_selection_llm = gr.Dropdown(choices=dropdown_options_llm, label="Select API", interactive=True,value="Huggingface API")
                 api_auth_dropdown_llm= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
-                api_key_value_llm = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
+                api_key_value_llm = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_API_KEY")
             with gr.Row():
                 llm_name= gr.Dropdown(label="Model name", interactive=True,allow_custom_value=True,value="meta-llama/Llama-3.1-8B-Instruct",choices=model_lists["Huggingface API"])
                 provider_llm = gr.Textbox(label="provider",interactive=True)
@@ -44,7 +44,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             with gr.Row():
                 api_selection_image = gr.Dropdown(choices=dropdown_options_image, label="Select API", interactive=True,value="Huggingface API")
                 api_auth_dropdown_image= gr.Dropdown(choices=dropdown_options_api, label="Select auth method", interactive=True,value="Enviromental variable token")
-                api_key_value_image = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_TOKEN")
+                api_key_value_image = gr.Textbox(label=f"Enter auth key", interactive=True,value="HF_API_KEY")
             with gr.Row():
                 model_name_image = gr.Textbox(label="Image model name", interactive=True,value="stabilityai/stable-diffusion-3.5-large-turbo")
                 image_style = gr.Textbox(label="Image style",interactive=True)

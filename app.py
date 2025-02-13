@@ -63,6 +63,11 @@ def connect_to_api_llm(api,key,model_name,provider=""):
             print(f"Local model loaded: {model_name}")
         except Exception as e:
             print(f"Error loading local model: {str(e)}")
+    elif api =="OpenRouter":
+        clientLLM = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=key
+        )
 
 def connect_to_api_image(api,key,provider=""):
     global clientImage
@@ -83,6 +88,7 @@ def api_call_llm(msgs,selected_api, model_name, temperature = 0.7, max_tokens= 2
         "Huggingface API": lambda msgs:clientLLM.chat.completions.create(messages=msgs,model = model_name,temperature=temperature,max_tokens=max_tokens).choices[0].message.content,
         "OpenAI": lambda msgs: clientLLM.chat.completions.create(model=model_name,messages=msgs, temperature=temperature, max_tokens=max_tokens).choices[0].message.content,
         "Anthropic": lambda msgs: clientLLM.messages.create(model=model_name,messages=msgs, temperature=temperature, max_tokens=max_tokens,system=system_message).content[0].text,
+        "OpenRouter":lambda msgs: clientLLM.chat.completions.create(messages=msgs,model = model_name,temperature=temperature,max_tokens=max_tokens).choices[0].message.content,
         "Local": lambda msgs: clientLLM.generate_response(msgs)
     }
     return api_call[selected_api](msgs)
