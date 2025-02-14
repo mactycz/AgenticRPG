@@ -47,11 +47,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             with gr.Row():
                 load_story_button = gr.Button("Load story", interactive=True)
         
-        api_auth_dropdown_llm.change(fn=update_placeholders_llm, inputs=[api_selection_llm,api_auth_dropdown_llm,gr.State(default_keys),gr.State(model_lists),gr.State(default_models_llm)],outputs=[api_key_value_llm,llm_name,llm_name])
-        api_selection_llm.change(fn=update_placeholders_llm, inputs=[api_selection_llm,api_auth_dropdown_llm,gr.State(default_keys),gr.State(model_lists),gr.State(default_models_llm)],outputs=[api_key_value_llm,llm_name,llm_name])
-
-        api_auth_dropdown_image.change(fn=update_placeholders_image, inputs=[api_selection_image,api_auth_dropdown_image,gr.State(default_keys),gr.State(default_models_image)],outputs=[api_key_value_image,model_name_image])
-        api_selection_image.change(fn=update_placeholders_image, inputs=[api_selection_image,api_auth_dropdown_image,gr.State(default_keys),gr.State(default_models_image)],outputs=[api_key_value_image,model_name_image])
+        
     with gr.Column(visible=False) as main_interface:
         with gr.Row():
             with gr.Column():
@@ -76,6 +72,26 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             save_name = gr.Textbox(label="Story name",interactive=True,value="")
             save_option = gr.Dropdown(label="Save option",choices=["Session summary","Full session"],interactive=True)
             save_story_button = gr.Button("Save the story")
+
+    api_auth_dropdown_llm.change(
+        fn=update_placeholders_llm,
+        inputs=[api_selection_llm,api_auth_dropdown_llm,gr.State(default_keys),gr.State(model_lists),gr.State(default_models_llm)],
+        outputs=[api_key_value_llm,llm_name,llm_name])
+    
+    api_selection_llm.change(
+        fn=update_placeholders_llm,
+        inputs=[api_selection_llm,api_auth_dropdown_llm,gr.State(default_keys),gr.State(model_lists),gr.State(default_models_llm)],
+        outputs=[api_key_value_llm,llm_name,llm_name])
+
+    api_auth_dropdown_image.change(
+        fn=update_placeholders_image,
+        inputs=[api_selection_image,api_auth_dropdown_image,gr.State(default_keys),gr.State(default_models_image)],
+        outputs=[api_key_value_image,model_name_image])
+    
+    api_selection_image.change(
+        fn=update_placeholders_image,
+        inputs=[api_selection_image,api_auth_dropdown_image,gr.State(default_keys),gr.State(default_models_image)]
+        ,outputs=[api_key_value_image,model_name_image])
 
     load_story_button.click(
         fn=load_story,
