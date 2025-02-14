@@ -123,15 +123,18 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         fn=add_key_and_show_interface,
         inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image],
         outputs=[selection_interface,main_interface])
+    
     api_key_button.click(
         fn=add_key_and_show_interface,
         inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image],
         outputs=[main_interface,selection_interface]
         ).then(fn = generate_session_id, outputs=session_id)
+    
     chat_story.chatbot.change(
         fn=conditional_generate_image,
         inputs=[chat_story.chatbot, chat_story.additional_inputs[4],api_selection_llm,api_selection_image,session_id,image_state,llm_name,model_name_image,temperature,image_style],
         outputs=[image,image_state])
+    
     image_state.change(
         fn=update_image,
         inputs=[image_state],
