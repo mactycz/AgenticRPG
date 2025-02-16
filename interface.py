@@ -104,7 +104,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
     load_story_button.click(
         fn=load_story,
         inputs=[saved_sessions],
-        outputs=[initialize_story_state,chat_story.chatbot,session_id,image_state]
+        outputs=[initialize_story_state,chat_story.chatbot,session_id,image_state,session_type]
         ).then(
         fn=add_key_and_show_interface,
         inputs=[api_selection_llm, api_auth_dropdown_llm, api_key_value_llm, llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image],
@@ -112,7 +112,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
     
     save_story_button.click(
         fn=summarize_and_save,
-        inputs=[chat_story.chatbot,save_name,api_selection_llm,save_option,image_state,session_id],
+        inputs=[chat_story.chatbot,save_name,api_selection_llm,session_type,save_option,image_state,session_id],
         outputs=None)
     image_button.click(
         fn=generate_image,inputs=[chat_story.chatbot,api_selection_llm,api_selection_image,session_id,image_state,llm_name,model_name_image,temperature,image_style],
@@ -133,6 +133,10 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         outputs=[selection_interface,main_interface])
     
     new_session_button.click(
+        fn=update_session_type,
+        inputs=[session_type_list],
+        outputs=session_type
+    ).then(
         fn=add_key_and_show_interface,
         inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image],
         outputs=[main_interface,selection_interface]
