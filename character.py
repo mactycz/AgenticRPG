@@ -21,11 +21,12 @@ class Character():
     def is_alive(self):
         return self.current_hp>0
     
-    def roll(self, dice=20):
+    @staticmethod
+    def roll(dice=20):
         return random.randint(1,dice)
     
     def result(self, stat, required, dice):
-        roll_value = self.roll(dice)
+        roll_value = Character.roll(dice)
         modifier = (self.stats.get(stat,10)-10)//2
         total = roll_value + modifier
         if roll_value == 1:
