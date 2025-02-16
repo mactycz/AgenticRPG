@@ -109,8 +109,8 @@ def api_call_image(prompt,selected_api,model):
     return image
 
 
-def chat(message,history,selected_api,model_name,temperature,abcd=False,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
-    messages = [{"role": "system", "content": localPromptStory + (abcd_options if abcd else "")}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
+def chat(message,history,selected_api,model_name,temperature,session_type,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
+    messages = [{"role": "system", "content": localPromptStory + (abcd_options if session_type=="ABCD options" else "")}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
     if len(history) == 1:
         messages.append({"role": "assistant", "content": initialize_story})
         messages.append({"role": "user", "content": localPromptStory+message})

@@ -32,3 +32,4 @@ default_models_image = {
 }
 api_key = ""
 api_token = ""
+session_types =["ABCD options","Text adventure","True RPG"]

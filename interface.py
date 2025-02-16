@@ -3,7 +3,10 @@ from app import *
 from prompts import *
 from session import *
 from common import *
-with gr.Blocks(fill_width=True,fill_height=True)as demo:
+from character import Character
+from styles.css import css
+
+with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
     initialize_story_state = gr.State(initialize_story)
     current_session_name = gr.State("")
     session_id = gr.State("")
@@ -12,6 +15,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
                             "current_image_index":0,
                             "image_count":0
                             })
+    session_type = gr.State("ABCD options")
                             
     with gr.Column() as selection_interface:
         with gr.Group():
@@ -36,7 +40,11 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
                 model_name_image = gr.Textbox(label="Image model name", interactive=True,value="stabilityai/stable-diffusion-3.5-large-turbo")
                 image_style = gr.Textbox(label="Image style",interactive=True)
                 provider_image = gr.Textbox(label="provider",interactive=True)
-        api_key_button = gr.Button("New session")
+        with gr.Group():
+            with gr.Row(equal_height=True):
+                session_type_list = gr.Dropdown(choices=session_types,interactive=True)
+                new_session_button = gr.Button("New session",variant="primary",elem_id="new_session_button")
+            
         with gr.Group():
             with gr.Row():
                 saved_sessions = gr.Dropdown(
@@ -53,24 +61,24 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
             with gr.Column():
                 chat_story = gr.ChatInterface(
                 fn=chat,
-                chatbot=gr.Chatbot(height=600,
+                chatbot=gr.Chatbot(height=512,
                     value=[(None,initialize_story_state.value)]),
                     additional_inputs=[api_selection_llm,llm_name,temperature,
-                        gr.Checkbox(label="Use ABCD options"),
                         gr.Checkbox(label ="Automatically generate an image")])
                 
             with gr.Column():
                 change_api = gr.Button("Change API")
-                image= gr.Image(image_state.value["current_image_path"],label="Image",height=600,type='filepath')
+                image= gr.Image(image_state.value["current_image_path"],label="Image",height=512,type='filepath')
                 with gr.Row():
                     previous = gr.Button("←")
                     counter = gr.Button(f"{image_state.value['current_image_index']}/{image_state.value['image_count']}")
                     next = gr.Button("→")
                 image_button = gr.Button("Generate Image")
 
+   
         with gr.Row():
             save_name = gr.Textbox(label="Story name",interactive=True,value="")
-            save_option = gr.Dropdown(label="Save option",choices=["Session summary","Full session"],interactive=True)
+            save_option = gr.Dropdown(label="Save option",choices=["Full session","Session summary"],interactive=True)
             save_story_button = gr.Button("Save the story")
 
     api_auth_dropdown_llm.change(
@@ -124,7 +132,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
         inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image],
         outputs=[selection_interface,main_interface])
     
-    api_key_button.click(
+    new_session_button.click(
         fn=add_key_and_show_interface,
         inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image],
         outputs=[main_interface,selection_interface]
@@ -132,7 +140,7 @@ with gr.Blocks(fill_width=True,fill_height=True)as demo:
     
     chat_story.chatbot.change(
         fn=conditional_generate_image,
-        inputs=[chat_story.chatbot, chat_story.additional_inputs[4],api_selection_llm,api_selection_image,session_id,image_state,llm_name,model_name_image,temperature,image_style],
+        inputs=[chat_story.chatbot, chat_story.additional_inputs[3],api_selection_llm,api_selection_image,session_id,image_state,llm_name,model_name_image,temperature,image_style],
         outputs=[image,image_state])
     
     image_state.change(
