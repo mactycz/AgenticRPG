@@ -83,7 +83,7 @@ def connect_to_api_image(api,key,provider=""):
         print("TODO")
         clientImage = None
 
-def api_call_llm(msgs,selected_api, model_name, temperature = 0.7, max_tokens= 2000 , system_message = localPromptStory):
+def api_call_llm(msgs,selected_api, model_name, temperature = 0.7, max_tokens= 2000 , system_message = local_prompt_story):
     api_call={
         "Huggingface API": lambda msgs:clientLLM.chat.completions.create(messages=msgs,model = model_name,temperature=temperature,max_tokens=max_tokens).choices[0].message.content,
         "OpenAI": lambda msgs: clientLLM.chat.completions.create(model=model_name,messages=msgs, temperature=temperature, max_tokens=max_tokens).choices[0].message.content,
@@ -110,13 +110,13 @@ def api_call_image(prompt,selected_api,model):
 
 
 def chat(message,history,selected_api,model_name,temperature,session_type,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
-    messages = [{"role": "system", "content": localPromptStory + (abcd_options if session_type=="ABCD options" else "")}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
+    messages = [{"role": "system", "content": local_prompt_story + session_type_prompt[session_type]}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
     if len(history) == 1:
         messages.append({"role": "assistant", "content": initialize_story})
-        messages.append({"role": "user", "content": localPromptStory+message})
+        messages.append({"role": "user", "content": local_prompt_story+message})
         output = api_call_llm(messages,selected_api,model_name,temperature)
-        history.append([None,localPromptStory+message])
-        history.append([localPromptStory+message,output])
+        history.append([None,local_prompt_story+message])
+        history.append([local_prompt_story+message,output])
     else:
         for user_msg, bot_msg in history:
             if user_msg is not None:
