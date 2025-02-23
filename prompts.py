@@ -10,19 +10,35 @@ true_rpg_action_required = """Based on the following interaction, decide what ac
 2. A roll is required to determine a success or failure of player action.
 3. A new character appears in the story. It might be friend or a foe.
 4. Something happens to the player or any character - it might be something good like stat upgrade or health restored - or something bad, like loosing health.
-Please output only a number representing an option. Your answer should be in parenthesis between two || signs. Do not say anything else, or it will break the functioning of an application. Output should be exactly 7 characters.
+Output only the option number, formatted exactly as: (n), where n is 1, 2, 3, or 4. The output must be exactly 3 characters long. Do not include any additional text.
 Example output:
-||(1)||
+(1)
 """
 
-true_rpg_roll_need = """Based on the following interaction, decide if the player needs to roll on a stat or not in a classic RPG DND style.
-Your answer should be in parenthesis between two || signs. Arguments should be delimeted with comma. First argument should be True if roll is needed, False if not. 
-Second argument should be stat.
+true_rpg_roll_need = """Based on the following interaction, decide what statistic the player needs to roll on in a classic RPG DND style.
+Your answer should be in parenthesis. Arguments should be delimeted with comma. First argument should be True if roll is needed, False if not. 
+Second argument should be statistic - one among these : Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma.
 Third argument should be difficulty - between 1 and 30. 1-5 is incredibely easy, 6-10 is easy, 10-15 medium, 15-20 hard, over 20 is very hard, with 30 almost impossible. 10 should be dafault.
 Example results:
-||(True,Charisma,15)||
-||(False)||
+(True,Charisma,15)
+(False)
 """
 true_rpg_output = """
 Based on the classic RPG DND stat test result, continue the story and what happens next.
+"""
+
+true_rpg_character_creation = """ Provide a code that could be used for creating new character for classic RPG DND session.
+Here is the character class initialization:
+class Character():
+    BASE_STATS = {"STR": 10, "DEX": 10, "CON": 10, "INT": 10, "WIS": 10, "CHA": 10}
+    def __init__(self, name, max_hp, stats=None, current_hp=None)
+Answer should be a valid code.
+Do not return any more text than necessary.
+Example result:
+Lancelot = Character("Lancelot",20,stats = {"STR": 14, "DEX": 8, "CON": 13, "INT": 7, "WIS": 10, "CHA": 9})
+
+"""
+
+true_rpg_event_results="""
+
 """
