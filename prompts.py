@@ -4,7 +4,7 @@ summarize_for_image= "You are helpful and creative summarizer. You summarize sto
 initialize_story="Welcome to the RPG adventure! Describe the theme of the story, and I'll be a game master. "
 summarize_for_future = "You are helpful and creative summarizer. You summarize the session, and it should include all of the important events and characters, and their characteristics. Make it as long as necessary, to include everything important. This summary should be useful for future sessions for continuation of the story."
 session_type_prompt ={
-    "ABDC options":"Generate 4 options for the player to choose from. Each option should be a possible action or a choice that the player can make. Make them different and interesting, but not too long.",
+    "ABCD options":"Generate 4 options for the player to choose from. Each option should be a possible action or a choice that the player can make. Make them different and interesting, but not too long.",
     "Text adventure":"Leave option for players to interact, but don't provide the options directly - players should provide their part of the story in form of full text dscription of their interaction.",
     "True RPG":""
 }
