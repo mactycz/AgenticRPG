@@ -67,6 +67,25 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                     value=[(None,initialize_story_state.value)]),
                     additional_inputs=[api_selection_llm,llm_name,temperature,session_type,
                         gr.Checkbox(label ="Automatically generate an image")])
+                with gr.Row(visible=False) as True_RPG_interface:
+                            with gr.Column():
+                                with gr.Row():
+                                    character_portrait = gr.Image(label="Portrait", 
+                                                        value="./helpers/placeholder.png",  # Placeholder image
+                                                        height=300)
+                                with gr.Row():
+                                    character_name = gr.Label(label="Character Name", value="Unknown")
+                            with gr.Column():
+                                    stats_column = []
+                                    for stat in Character.BASE_STATS:
+                                            stats_column.append(
+                                                gr.Number(label=stat, value=10, 
+                                                        interactive=False, 
+                                                        elem_classes="stat-box")
+                                            )
+                        
+                                
+                                
                 
             with gr.Column():
                 change_api = gr.Button("Change API")
@@ -82,10 +101,19 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                     save_name = gr.Textbox(label="Story name",interactive=True,value="")
                     save_option = gr.Dropdown(label="Save option",choices=["Full session","Session summary"],interactive=True)
                     save_story_button = gr.Button("Save the story")
-        with gr.Row(visible=False) as True_RPG_interface:
-            with gr.Column():
-                gr.Markdown("Ph")
-
+        
+                    
+                    # # Stats column
+                    # with gr.Column(scale=2):
+                    #     with gr.Row():
+                    #         stats_column = []
+                    #         for stat in Character.BASE_STATS:
+                    #             with gr.Column(min_width=100):
+                    #                 stats_column.append(
+                    #                     gr.Number(label=stat, value=10, 
+                    #                             interactive=False, 
+                    #                             elem_classes="stat-box")
+                    #                 )
 
 
     api_auth_dropdown_llm.change(

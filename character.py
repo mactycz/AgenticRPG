@@ -36,3 +36,9 @@ class Character():
         else:
             return total >= required
 
+    def get_display_data(self):
+        return {
+            "name": self.name,
+            "hp": f"{self.current_hp}/{self.max_hp}",
+            "stats": self.stats
+        }
