@@ -61,7 +61,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
             with gr.Column():
                 chat_story = gr.ChatInterface(
                 fn=chat,
-                chatbot=gr.Chatbot(height=512,
+                chatbot=gr.Chatbot(height=chat_height[session_type.value],
                     value=[(None,initialize_story_state.value)]),
                     additional_inputs=[api_selection_llm,llm_name,temperature,session_type,
                         gr.Checkbox(label ="Automatically generate an image")])
@@ -76,10 +76,10 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                 image_button = gr.Button("Generate Image")
 
    
-        with gr.Row():
-            save_name = gr.Textbox(label="Story name",interactive=True,value="")
-            save_option = gr.Dropdown(label="Save option",choices=["Full session","Session summary"],interactive=True)
-            save_story_button = gr.Button("Save the story")
+                with gr.Row():
+                    save_name = gr.Textbox(label="Story name",interactive=True,value="")
+                    save_option = gr.Dropdown(label="Save option",choices=["Full session","Session summary"],interactive=True)
+                    save_story_button = gr.Button("Save the story")
 
     api_auth_dropdown_llm.change(
         fn=update_placeholders_llm,
