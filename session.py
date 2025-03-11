@@ -7,6 +7,7 @@ import datetime
 import os
 from prompts import summarize_for_future
 from app import generate_text
+from common import chat_height, true_rpg_interface
 SESSION_REGISTRY = "sessions_registry.json"
 
 def generate_session_id():
@@ -95,5 +96,6 @@ def load_story(session_id):
 def update_session_type(session_type):
     return session_type
 
-
-    
+def update_interface_on_session_type(session_type):
+    return gr.update(height=chat_height[session_type]),gr.update(visible=true_rpg_interface[session_type])
+        

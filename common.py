@@ -34,3 +34,4 @@ api_key = ""
 api_token = ""
 session_types =["ABCD options","Text adventure","True RPG"]
 chat_height={"ABCD options":512,"Text adventure":512,"True RPG":400}
+true_rpg_interface = {"ABCD options":False,"Text adventure":False,"True RPG":True}

@@ -8,6 +8,8 @@ from styles.css import css
 
 with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
     initialize_story_state = gr.State(initialize_story)
+    true_rpg_interface = gr.State(true_rpg_interface)
+    chat_height = gr.State(chat_height)
     current_session_name = gr.State("")
     session_id = gr.State("")
     image_state = gr.State({
@@ -61,7 +63,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
             with gr.Column():
                 chat_story = gr.ChatInterface(
                 fn=chat,
-                chatbot=gr.Chatbot(height=chat_height[session_type.value],
+                chatbot=gr.Chatbot(height=512,
                     value=[(None,initialize_story_state.value)]),
                     additional_inputs=[api_selection_llm,llm_name,temperature,session_type,
                         gr.Checkbox(label ="Automatically generate an image")])
@@ -80,6 +82,11 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                     save_name = gr.Textbox(label="Story name",interactive=True,value="")
                     save_option = gr.Dropdown(label="Save option",choices=["Full session","Session summary"],interactive=True)
                     save_story_button = gr.Button("Save the story")
+        with gr.Row(visible=False) as True_RPG_interface:
+            with gr.Column():
+                gr.Markdown("Ph")
+
+
 
     api_auth_dropdown_llm.change(
         fn=update_placeholders_llm,
@@ -151,6 +158,10 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         fn=update_image,
         inputs=[image_state],
         outputs=[image,counter])
+    session_type.change(
+        fn=update_interface_on_session_type,
+        inputs=[session_type],
+        outputs=[chat_story.chatbot,True_RPG_interface])
 
 
 demo.launch()
