@@ -67,22 +67,33 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                     value=[(None,initialize_story_state.value)]),
                     additional_inputs=[api_selection_llm,llm_name,temperature,session_type,
                         gr.Checkbox(label ="Automatically generate an image")])
-                with gr.Row(visible=False) as True_RPG_interface:
-                            with gr.Column():
-                                with gr.Row():
-                                    character_portrait = gr.Image(label="Portrait", 
-                                                        value="./helpers/placeholder.png",  # Placeholder image
-                                                        height=300)
-                                with gr.Row():
-                                    character_name = gr.Label(label="Character Name", value="Unknown")
-                            with gr.Column():
-                                    stats_column = []
-                                    for stat in Character.BASE_STATS:
-                                            stats_column.append(
-                                                gr.Number(label=stat, value=10, 
-                                                        interactive=False, 
-                                                        elem_classes="stat-box")
-                                            )
+                
+                with gr.Row(visible=False, elem_classes="character-card") as True_RPG_interface:
+                    # Left Section - Portrait and Identity
+                    with gr.Column(min_width=300):
+                        gr.Image("helpers/placeholder.png", 
+                                elem_classes="character-portrait",
+                                interactive=False)
+                        
+                        with gr.Row():
+                            gr.Markdown("**Character Name**", 
+                                    elem_classes="name-text")
+                            gr.Markdown("**100/100**", 
+                                    elem_classes="health-text")
+                    
+                    # Right Section - Stats
+                    with gr.Column(elem_classes="stats-column"):
+                        gr.Markdown("⚔️ **Attributes**", 
+                                elem_classes="stats-header")
+                        
+                        with gr.Column(elem_classes="stats-grid"):
+                            gr.Markdown("🗡 **Strength**: 18", elem_classes="stat-item")
+                            gr.Markdown("🏹 **Dexterity**: 14", elem_classes="stat-item")
+                            gr.Markdown("📚 **Intelligence**: 16", elem_classes="stat-item")
+                            gr.Markdown("🔮 **Wisdom**: 12", elem_classes="stat-item")
+                            gr.Markdown("❤️ **Constitution**: 15", elem_classes="stat-item")
+                            gr.Markdown("🎭 **Charisma**: 10", elem_classes="stat-item")
+
                         
                                 
                                 
