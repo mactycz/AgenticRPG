@@ -63,7 +63,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
             with gr.Column():
                 chat_story = gr.ChatInterface(
                 fn=chat,
-                chatbot=gr.Chatbot(height=384,
+                chatbot=gr.Chatbot(height=chat_height.value,
                     value=[(None,initialize_story_state.value)]),
                     additional_inputs=[api_selection_llm,llm_name,temperature,session_type,
                         gr.Checkbox(label ="Automatically generate an image")])
