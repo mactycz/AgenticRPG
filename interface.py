@@ -63,29 +63,18 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
             with gr.Column():
                 chat_story = gr.ChatInterface(
                 fn=chat,
-                chatbot=gr.Chatbot(height=512,
+                chatbot=gr.Chatbot(height=384,
                     value=[(None,initialize_story_state.value)]),
                     additional_inputs=[api_selection_llm,llm_name,temperature,session_type,
                         gr.Checkbox(label ="Automatically generate an image")])
                 
                 with gr.Row(visible=False, elem_classes="character-card") as True_RPG_interface:
-                    # Left Section - Portrait and Identity
-                    with gr.Column(min_width=300):
+                    with gr.Column(min_width=300, elem_classes="identity-column"):
                         gr.Image("helpers/placeholder.png", 
                                 elem_classes="character-portrait",
-                                interactive=False)
-                        
-                        with gr.Row():
-                            gr.Markdown("**Character Name**", 
-                                    elem_classes="name-text")
-                            gr.Markdown("**100/100**", 
-                                    elem_classes="health-text")
-                    
-                    # Right Section - Stats
-                    with gr.Column(elem_classes="stats-column"):
-                        gr.Markdown("⚔️ **Attributes**", 
-                                elem_classes="stats-header")
-                        
+                                interactive=False,
+                                min_width=300)
+                    with gr.Column(elem_classes="stats-column"):                        
                         with gr.Column(elem_classes="stats-grid"):
                             gr.Markdown("🗡 **Strength**: 18", elem_classes="stat-item")
                             gr.Markdown("🏹 **Dexterity**: 14", elem_classes="stat-item")
@@ -93,11 +82,12 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                             gr.Markdown("🔮 **Wisdom**: 12", elem_classes="stat-item")
                             gr.Markdown("❤️ **Constitution**: 15", elem_classes="stat-item")
                             gr.Markdown("🎭 **Charisma**: 10", elem_classes="stat-item")
+                        with gr.Column(elem_classes="name-container"):
+                            gr.Markdown("**Character Name**", 
+                                    elem_classes="name-text")
+                            gr.Markdown("**❤ 100/100**", 
+                                    elem_classes="health-text")
 
-                        
-                                
-                                
-                
             with gr.Column():
                 change_api = gr.Button("Change API")
                 image= gr.Image(image_state.value["current_image_path"],label="Image",height=512,type='filepath')
@@ -113,18 +103,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                     save_option = gr.Dropdown(label="Save option",choices=["Full session","Session summary"],interactive=True)
                     save_story_button = gr.Button("Save the story")
         
-                    
-                    # # Stats column
-                    # with gr.Column(scale=2):
-                    #     with gr.Row():
-                    #         stats_column = []
-                    #         for stat in Character.BASE_STATS:
-                    #             with gr.Column(min_width=100):
-                    #                 stats_column.append(
-                    #                     gr.Number(label=stat, value=10, 
-                    #                             interactive=False, 
-                    #                             elem_classes="stat-box")
-                    #                 )
+
 
 
     api_auth_dropdown_llm.change(
