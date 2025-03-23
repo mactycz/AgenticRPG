@@ -19,7 +19,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                             })
     session_type = gr.State("ABCD options")
                             
-    with gr.Column() as selection_interface:
+    with gr.Column(visible=False) as selection_interface:
         with gr.Group():
             gr.Markdown("<h4 style='text-align: center; margin: 0; padding: 5px;'>LLM Settings</h4>")
             with gr.Row():
@@ -102,6 +102,28 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                     save_name = gr.Textbox(label="Story name",interactive=True,value="")
                     save_option = gr.Dropdown(label="Save option",choices=["Full session","Session summary"],interactive=True)
                     save_story_button = gr.Button("Save the story")
+    with gr.Column(visible=True) as character_creation_interface:
+        with gr.Row():
+            with gr.Column(scale=1):
+                character_description = gr.Textbox(label="Character Description",interactive=True,lines=5)
+                backstory = gr.Textbox(label="Backstory",interactive=True,lines = 5)
+                generate_portrait = gr.Button("Generate Portrait")
+            with gr.Column(scale=2):
+                character_portrait = gr.Image(height=512,width=512)
+                character_name = gr.Textbox(label="Character Name",interactive=True)
+            with gr.Column(scale=1):
+                str_stat = gr.Number(value=10,label="Strength")
+                dex_stat = gr.Number(value=10,label="Dexterity")
+                con_stat = gr.Number(value=10,label="Constitution")
+                int_stat = gr.Number(value=10,label="Intelligence")
+                wis_stat = gr.Number(value=10,label="Wisdom")
+                cha_stat = gr.Number(value=10,label="Charisma")
+                max_hp = gr.Number(value=100,label="Max HP")
+        with gr.Row():
+                begin_adventure = gr.Button("Begin Adventure!")
+
+
+
         
 
 
