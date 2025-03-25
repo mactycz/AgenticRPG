@@ -79,16 +79,16 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                                 min_width=300)
                     with gr.Column(elem_classes="stats-column"):                        
                         with gr.Column(elem_classes="stats-grid"):
-                            gr.Markdown("🗡 **Strength**: 18", elem_classes="stat-item")
-                            gr.Markdown("🏹 **Dexterity**: 14", elem_classes="stat-item")
-                            gr.Markdown("📚 **Intelligence**: 16", elem_classes="stat-item")
-                            gr.Markdown("🔮 **Wisdom**: 12", elem_classes="stat-item")
-                            gr.Markdown("❤️ **Constitution**: 15", elem_classes="stat-item")
-                            gr.Markdown("🎭 **Charisma**: 10", elem_classes="stat-item")
+                            str_main=gr.Markdown("🗡 **Strength**: 18", elem_classes="stat-item")
+                            dex_main=gr.Markdown("🏹 **Dexterity**: 14", elem_classes="stat-item")
+                            int_main=gr.Markdown("📚 **Intelligence**: 16", elem_classes="stat-item")
+                            wis_main=gr.Markdown("🔮 **Wisdom**: 12", elem_classes="stat-item")
+                            con_main=gr.Markdown("❤️ **Constitution**: 15", elem_classes="stat-item")
+                            cha_main=gr.Markdown("🎭 **Charisma**: 10", elem_classes="stat-item")
                         with gr.Column(elem_classes="name-container"):
                             character_name_main=gr.Markdown("**Character Name**", 
                                     elem_classes="name-text")
-                            gr.Markdown("**❤ 100/100**", 
+                            hp_main=gr.Markdown("**❤ 100/100**", 
                                     elem_classes="health-text")
 
             with gr.Column():
@@ -223,7 +223,12 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
     ).then(fn=lambda name:name,
            inputs=character_name,
            outputs=character_name_main
-    )
+    ).then(
+    fn=lambda hp_state, s, d, i, w, co, ch: (
+        hp_state, str(s), str(d), str(i), str(w), str(co), str(ch)),
+    inputs=[gr.State(f"{max_hp.value}/{max_hp.value}"), str_stat, dex_stat, int_stat, wis_stat, con_stat, cha_stat],
+    outputs=[hp_main, str_main, dex_main, int_main, wis_main, con_main, cha_main]
+)
     
 
     generate_portrait.click(
