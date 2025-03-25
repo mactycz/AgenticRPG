@@ -12,7 +12,7 @@ import requests
 clientLLM = None
 clientImage = None
 
-def add_key_and_show_interface(api_llm,auth_llm, provided_api_key_llm,model_name_llm,provider_llm,api_image,auth_image, provided_api_key_image_image,provider_image):
+def add_key_and_show_interface(api_llm,auth_llm, provided_api_key_llm,model_name_llm,provider_llm,api_image,auth_image, provided_api_key_image_image,provider_image,session_type,character_created):
     if provided_api_key_llm=="":
         gr.Info("Please provide an API key").update(visible=True)
         return gr.update(visible=False),gr.update(visible=True)
@@ -22,7 +22,11 @@ def add_key_and_show_interface(api_llm,auth_llm, provided_api_key_llm,model_name
         provided_api_key_image_image = os.environ.get(provided_api_key_image_image)
     connect_to_api_llm(api_llm,provided_api_key_llm,model_name_llm,provider_llm)
     connect_to_api_image(api_image,provided_api_key_image_image,provider_image)
-    return gr.update(visible=True),gr.update(visible=False)
+    if session_type=="True RPG" and character_created==0:
+        return gr.update(visible=False),gr.update(visible=False),gr.update(visible=True)
+    else:
+        return gr.update(visible=True),gr.update(visible=False),gr.update(visible=False)
+
     
 
 def update_placeholders_llm(option,auth,keys,model_list,default_models):
@@ -184,4 +188,3 @@ def update_image_state(image_state,session_id,action,image_path=""):
 
 def update_image(image_state):
     return image_state['current_image_path'],f"{image_state['current_image_index']}/{image_state['image_count']}"
-

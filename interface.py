@@ -12,6 +12,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
     chat_height = gr.State(chat_height)
     current_session_name = gr.State("")
     session_id = gr.State("")
+    character_created = gr.State(False)
     image_state = gr.State({
                             "current_image_path":"helpers/placeholder.png",
                             "current_image_index":0,
@@ -19,7 +20,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                             })
     session_type = gr.State("ABCD options")
                             
-    with gr.Column(visible=False) as selection_interface:
+    with gr.Column(visible=True) as selection_interface:
         with gr.Group():
             gr.Markdown("<h4 style='text-align: center; margin: 0; padding: 5px;'>LLM Settings</h4>")
             with gr.Row():
@@ -102,7 +103,8 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                     save_name = gr.Textbox(label="Story name",interactive=True,value="")
                     save_option = gr.Dropdown(label="Save option",choices=["Full session","Session summary"],interactive=True)
                     save_story_button = gr.Button("Save the story")
-    with gr.Column(visible=True) as character_creation_interface:
+
+    with gr.Column(visible=False) as character_creation_interface:
         with gr.Row():
             with gr.Column(scale=1):
                 character_description = gr.Textbox(label="Character Description",interactive=True,lines=5)
@@ -154,8 +156,8 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         outputs=[initialize_story_state,chat_story.chatbot,session_id,image_state,session_type]
         ).then(
         fn=add_key_and_show_interface,
-        inputs=[api_selection_llm, api_auth_dropdown_llm, api_key_value_llm, llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image],
-        outputs=[main_interface,selection_interface])
+        inputs=[api_selection_llm, api_auth_dropdown_llm, api_key_value_llm, llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image,session_type,character_created],
+        outputs=[main_interface,selection_interface,character_creation_interface])
     
     save_story_button.click(
         fn=summarize_and_save,
@@ -176,8 +178,8 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
 
     change_api.click(
         fn=add_key_and_show_interface,
-        inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image],
-        outputs=[selection_interface,main_interface])
+        inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image,session_type,character_created],
+        outputs=[selection_interface,main_interface,character_creation_interface])
     
     new_session_button.click(
         fn=update_session_type,
@@ -185,8 +187,8 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         outputs=session_type
     ).then(
         fn=add_key_and_show_interface,
-        inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image],
-        outputs=[main_interface,selection_interface]
+        inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image,session_type,character_created],
+        outputs=[main_interface,selection_interface,character_creation_interface]
         ).then(fn = generate_session_id, outputs=session_id)
     
     chat_story.chatbot.change(
@@ -202,6 +204,14 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         fn=update_interface_on_session_type,
         inputs=[session_type],
         outputs=[chat_story.chatbot,True_RPG_interface])
+    
+    begin_adventure.click(
+        fn=add_key_and_show_interface,
+        inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image,session_type,character_created],
+        outputs=[character_creation_interface,selection_interface,main_interface]
+    ).then(fn=lambda x: True,
+           inputs=character_created,
+           outputs=character_created)
 
 
 demo.launch()
