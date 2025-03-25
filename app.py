@@ -137,9 +137,11 @@ def generate_text(system_prompt,user_story,model_name,selected_api,temperature,m
     output = api_call_llm(messages,selected_api,model_name,temperature=temperature,max_tokens=max_tokens,system_message=system_prompt)
     return output
 
-def generate_image(story,selected_api_llm,selected_api_image,session_id,image_state,model_name_llm,model_name_image,temperature,style=""):
-    story = story[-1][-1]
-    prompt = generate_text(summarize_for_image,story,model_name_llm,selected_api_llm,temperature)
+def generate_image(text,selected_api_llm,selected_api_image,session_id,image_state,model_name_llm,model_name_image,temperature,style=""):
+    #story = story[-1][-1]
+    print(text)
+    prompt = generate_text(summarize_for_image,text,model_name_llm,selected_api_llm,temperature)
+    print(prompt)
     if style != "":
         prompt = prompt+ f' Generate the image in {style} style.'
     image= api_call_image(prompt,selected_api_image,model_name_image)
@@ -148,12 +150,13 @@ def generate_image(story,selected_api_llm,selected_api_image,session_id,image_st
     os.makedirs(image_dir, exist_ok=True)
     image.save(f"{image_dir}/image-{date}.png")
     image_path = f"{image_dir}/image-{date}.png"
-    image_state = update_image_state(image_state,session_id,"Add",image_path)
+    if image_state!={}:
+        image_state = update_image_state(image_state,session_id,"Add",image_path)
     return image_path, image_state
 
 def conditional_generate_image(story,auto_generate,selected_api_llm,selected_api_image,session_id,image_state,model_name_llm,model_name_image,temperature,style=""):
     if auto_generate and story and story[-1][1] is not None:
-        return generate_image(story,selected_api_llm,selected_api_image,session_id,image_state,model_name_llm,model_name_image,temperature,style)
+        return generate_image(story[-1][1],selected_api_llm,selected_api_image,session_id,image_state,model_name_llm,model_name_image,temperature,style)
     else :
         return image_state["current_image_path"],image_state
 

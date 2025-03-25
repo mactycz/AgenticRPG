@@ -9,7 +9,7 @@ from styles.css import css
 with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
     initialize_story_state = gr.State(initialize_story)
     true_rpg_interface = gr.State(true_rpg_interface)
-    chat_height = gr.State(chat_height)
+    chat_height = gr.State(512)
     current_session_name = gr.State("")
     session_id = gr.State("")
     character_created = gr.State(False)
@@ -18,6 +18,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                             "current_image_index":0,
                             "image_count":0
                             })
+    
     session_type = gr.State("ABCD options")
                             
     with gr.Column(visible=True) as selection_interface:
@@ -71,7 +72,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                 
                 with gr.Row(visible=False, elem_classes="character-card") as True_RPG_interface:
                     with gr.Column(min_width=300, elem_classes="identity-column"):
-                        gr.Image("helpers/placeholder.png", 
+                        character_portrait_main =  gr.Image("helpers/placeholder.png", 
                                 elem_classes="character-portrait",
                                 interactive=False,
                                 min_width=300)
@@ -164,7 +165,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         inputs=[chat_story.chatbot,save_name,api_selection_llm,session_type,save_option,image_state,session_id],
         outputs=None)
     image_button.click(
-        fn=generate_image,inputs=[chat_story.chatbot,api_selection_llm,api_selection_image,session_id,image_state,llm_name,model_name_image,temperature,image_style],
+        fn=generate_image,inputs=[gr.State(chat_story.chatbot.value[-1][-1]),api_selection_llm,api_selection_image,session_id,image_state,llm_name,model_name_image,temperature,image_style],
         outputs=[image,image_state])
     previous.click(
         fn = lambda ist, sid : update_image_state(ist,sid,"previous"),
@@ -211,7 +212,18 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         outputs=[character_creation_interface,selection_interface,main_interface]
     ).then(fn=lambda x: True,
            inputs=character_created,
-           outputs=character_created)
+           outputs=character_created
+    ).then(fn=lambda img: img,
+           inputs=character_portrait,
+           outputs=character_portrait_main)
+
+    generate_portrait.click(
+        fn=lambda desc, backstory, *other_args: generate_image(
+        f"Character description: {desc}\nCharacter background: {backstory}. Portrait.",
+        *other_args),
+        inputs=[character_description,backstory,api_selection_llm,api_selection_image,session_id,gr.State({}),llm_name,model_name_image,temperature,image_style],
+        outputs=[character_portrait,gr.State({})]
+    )
 
 
 demo.launch()
