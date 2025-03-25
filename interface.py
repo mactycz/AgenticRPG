@@ -12,6 +12,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
     chat_height = gr.State(512)
     current_session_name = gr.State("")
     session_id = gr.State("")
+    character_backstory = gr.State("")
     character_created = gr.State(False)
     image_state = gr.State({
                             "current_image_path":"helpers/placeholder.png",
@@ -67,7 +68,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                 fn=chat,
                 chatbot=gr.Chatbot(height=chat_height.value,
                     value=[(None,initialize_story_state.value)]),
-                    additional_inputs=[api_selection_llm,llm_name,temperature,session_type,
+                    additional_inputs=[character_backstory,api_selection_llm,llm_name,temperature,session_type,
                         gr.Checkbox(label ="Automatically generate an image")])
                 
                 with gr.Row(visible=False, elem_classes="character-card") as True_RPG_interface:
@@ -215,7 +216,11 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         outputs=[character_creation_interface,selection_interface,main_interface]
     ).then(fn=lambda x: True,
            inputs=character_created,
-           outputs=character_created)
+           outputs=character_created
+    ).then(fn= lambda text: f"Main character backstory: {text}",
+           inputs=[backstory],
+           outputs=character_backstory)
+    
 
     generate_portrait.click(
         fn=lambda desc, backstory, *other_args: generate_image(

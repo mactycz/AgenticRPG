@@ -87,7 +87,7 @@ def connect_to_api_image(api,key,provider=""):
         print("TODO")
         clientImage = None
 
-def api_call_llm(msgs,selected_api, model_name, temperature = 0.7, max_tokens= 2000 , system_message = local_prompt_story):
+def api_call_llm(msgs,selected_api, model_name, temperature = 0.7, max_tokens= 2000 , system_message = system_prompt):
     api_call={
         "Huggingface API": lambda msgs:clientLLM.chat.completions.create(messages=msgs,model = model_name,temperature=temperature,max_tokens=max_tokens).choices[0].message.content,
         "OpenAI": lambda msgs: clientLLM.chat.completions.create(model=model_name,messages=msgs, temperature=temperature, max_tokens=max_tokens).choices[0].message.content,
@@ -113,14 +113,14 @@ def api_call_image(prompt,selected_api,model):
     return image
 
 
-def chat(message,history,selected_api,model_name,temperature,session_type,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
-    messages = [{"role": "system", "content": local_prompt_story + session_type_prompt[session_type]}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
+def chat(message,history,backstory,selected_api,model_name,temperature,session_type,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
+    messages = [{"role": "system", "content": system_prompt + session_type_prompt[session_type]+backstory}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
     if len(history) == 1:
         messages.append({"role": "assistant", "content": initialize_story})
-        messages.append({"role": "user", "content": local_prompt_story+message})
+        messages.append({"role": "user", "content": system_prompt+message})
         output = api_call_llm(messages,selected_api,model_name,temperature)
-        history.append([None,local_prompt_story+message])
-        history.append([local_prompt_story+message,output])
+        history.append([None,system_prompt+message])
+        history.append([system_prompt+message,output])
     else:
         for user_msg, bot_msg in history:
             if user_msg is not None:
@@ -138,10 +138,7 @@ def generate_text(system_prompt,user_story,model_name,selected_api,temperature,m
     return output
 
 def generate_image(text,selected_api_llm,selected_api_image,session_id,image_state,model_name_llm,model_name_image,temperature,style=""):
-    #story = story[-1][-1]
-    print(text)
     prompt = generate_text(summarize_for_image,text,model_name_llm,selected_api_llm,temperature)
-    print(prompt)
     if style != "":
         prompt = prompt+ f' Generate the image in {style} style.'
     image= api_call_image(prompt,selected_api_image,model_name_image)
