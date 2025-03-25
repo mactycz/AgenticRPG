@@ -86,7 +86,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                             gr.Markdown("❤️ **Constitution**: 15", elem_classes="stat-item")
                             gr.Markdown("🎭 **Charisma**: 10", elem_classes="stat-item")
                         with gr.Column(elem_classes="name-container"):
-                            gr.Markdown("**Character Name**", 
+                            character_name_main=gr.Markdown("**Character Name**", 
                                     elem_classes="name-text")
                             gr.Markdown("**❤ 100/100**", 
                                     elem_classes="health-text")
@@ -219,7 +219,11 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
            outputs=character_created
     ).then(fn= lambda text: f"Main character backstory: {text}",
            inputs=[backstory],
-           outputs=character_backstory)
+           outputs=character_backstory
+    ).then(fn=lambda name:name,
+           inputs=character_name,
+           outputs=character_name_main
+    )
     
 
     generate_portrait.click(
