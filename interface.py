@@ -3,7 +3,7 @@ from app import *
 from prompts import *
 from session import *
 from common import *
-from character import Character
+from character import *
 from styles.css import css
 
 with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
@@ -14,6 +14,7 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
     session_id = gr.State("")
     character_backstory = gr.State("")
     character_created = gr.State(False)
+    character_obj = gr.State()
     image_state = gr.State({
                             "current_image_path":"helpers/placeholder.png",
                             "current_image_index":0,
@@ -207,28 +208,32 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         inputs=[session_type],
         outputs=[chat_story.chatbot,True_RPG_interface])
     
-    begin_adventure.click(fn=lambda img: img,
-           inputs=character_portrait,
-           outputs=character_portrait_main
+    begin_adventure.click(
+    fn=lambda img: img,
+    inputs=character_portrait,
+    outputs=character_portrait_main
+    ).then(
+        fn=create_character,
+        inputs=[character_name, backstory, str_stat, dex_stat, int_stat, wis_stat, con_stat, cha_stat, max_hp],
+        outputs=character_obj
+    ).then(
+        fn=Character.get_ui_stats,
+        inputs=character_obj,
+        outputs=[hp_main, str_main, dex_main, int_main, wis_main, con_main, cha_main]
+    ).then(
+        fn=Character.get_ui_info,
+        inputs=character_obj,
+        outputs=[character_name_main, character_backstory]
     ).then(
         fn=add_key_and_show_interface,
-        inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image,session_type,character_created],
-        outputs=[character_creation_interface,selection_interface,main_interface]
-    ).then(fn=lambda x: True,
-           inputs=character_created,
-           outputs=character_created
-    ).then(fn= lambda text: f"Main character backstory: {text}",
-           inputs=[backstory],
-           outputs=character_backstory
-    ).then(fn=lambda name:name,
-           inputs=character_name,
-           outputs=character_name_main
+        inputs=[api_selection_llm, api_auth_dropdown_llm, api_key_value_llm, llm_name, provider_llm, 
+                api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image,
+                session_type, character_created],
+        outputs=[character_creation_interface, selection_interface, main_interface]
     ).then(
-    fn=lambda hp_state, s, d, i, w, co, ch: (
-        hp_state, str(s), str(d), str(i), str(w), str(co), str(ch)),
-    inputs=[gr.State(f"{max_hp.value}/{max_hp.value}"), str_stat, dex_stat, int_stat, wis_stat, con_stat, cha_stat],
-    outputs=[hp_main, str_main, dex_main, int_main, wis_main, con_main, cha_main]
-)
+        fn=lambda: True,
+        inputs=None,
+        outputs=character_created)
     
 
     generate_portrait.click(
