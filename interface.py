@@ -206,16 +206,16 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         inputs=[session_type],
         outputs=[chat_story.chatbot,True_RPG_interface])
     
-    begin_adventure.click(
+    begin_adventure.click(fn=lambda img: img,
+           inputs=character_portrait,
+           outputs=character_portrait_main
+    ).then(
         fn=add_key_and_show_interface,
         inputs=[api_selection_llm,api_auth_dropdown_llm,api_key_value_llm,llm_name, provider_llm, api_selection_image, api_auth_dropdown_image, api_key_value_image, provider_image,session_type,character_created],
         outputs=[character_creation_interface,selection_interface,main_interface]
     ).then(fn=lambda x: True,
            inputs=character_created,
-           outputs=character_created
-    ).then(fn=lambda img: img,
-           inputs=character_portrait,
-           outputs=character_portrait_main)
+           outputs=character_created)
 
     generate_portrait.click(
         fn=lambda desc, backstory, *other_args: generate_image(
