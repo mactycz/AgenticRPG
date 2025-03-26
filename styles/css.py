@@ -57,4 +57,58 @@ css = """
     margin-bottom: 12px !important;
     padding-bottom: 6px !important;
     border-bottom: 2px solid var(--border-color-primary);
-}"""
+}
+.dice-button {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 10px !important;
+    padding: 0 !important;
+    font-size: 2em !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--border-color-primary) !important;
+    transition: transform 0.1s;
+}
+
+.dice-button:hover {
+    transform: scale(1.05);
+}
+
+@keyframes shake {
+    0% { transform: rotate(0deg) translateX(0); }
+    25% { transform: rotate(-15deg) translateX(-5px); }
+    50% { transform: rotate(15deg) translateX(5px); }
+    75% { transform: rotate(-10deg) translateX(-3px); }
+    100% { transform: rotate(0deg) translateX(0); }
+}
+
+.shaking {
+    animation: shake 0.4s ease-in-out;
+}
+
+.result-container {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.dice-result {
+    font-size: 1.8em !important;
+    font-weight: bold !important;
+    color: var(--body-text-color) !important;
+    padding: 8px 15px !important;
+    background: var(--background-fill-primary);
+    border-radius: 6px;
+    border: 1px solid var(--border-color-primary);
+    box-shadow: var(--shadow-drop-sm);
+}
+"""
+js = """
+function() {
+    var btn = document.getElementById('dice-button');
+    btn.classList.add('shaking');
+    setTimeout(() => btn.classList.remove('shaking'), 400);
+    return [];
+}
+"""

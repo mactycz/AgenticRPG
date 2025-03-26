@@ -4,7 +4,7 @@ from prompts import *
 from session import *
 from common import *
 from character import *
-from styles.css import css
+from styles.css import css, js
 
 with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
     initialize_story_state = gr.State(initialize_story)
@@ -91,6 +91,9 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
                                     elem_classes="name-text")
                             hp_main=gr.Markdown("**❤ 100/100**", 
                                     elem_classes="health-text")
+                            with gr.Row(elem_classes="result-container"):
+                                roll_button = gr.Button("🎲", elem_id="dice-button", elem_classes="dice-button")
+                                roll_results = gr.Markdown("", elem_id="dice-result", elem_classes="dice-result")
 
             with gr.Column():
                 change_api = gr.Button("Change API")
@@ -235,7 +238,6 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         inputs=None,
         outputs=character_created)
     
-
     generate_portrait.click(
         fn=lambda desc, backstory, *other_args: generate_image(
         f"Character description: {desc}\nCharacter background: {backstory}. Portrait.",
@@ -243,6 +245,11 @@ with gr.Blocks(fill_width=True,fill_height=True,css=css)as demo:
         inputs=[character_description,backstory,api_selection_llm,api_selection_image,session_id,gr.State({}),llm_name,model_name_image,temperature,image_style],
         outputs=[character_portrait,gr.State({})]
     )
-
+    roll_button.click(
+        fn=lambda : f"**{Character.roll()}**",
+        outputs=roll_results,
+        queue=False,
+        js=js
+    )
 
 demo.launch()
