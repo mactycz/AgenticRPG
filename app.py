@@ -115,21 +115,45 @@ def api_call_image(prompt,selected_api,model):
 
 def chat(message,history,backstory,selected_api,model_name,temperature,session_type,automatic_image=False): # the automatic image is for conditional_generate_image to work, as I want two checkboxes in the same place - there must be a better way to do it, but it works for now
     messages = [{"role": "system", "content": system_prompt + session_type_prompt[session_type]+backstory}] if selected_api != "Anthropic" else [] #anthropic doesn't like system role 
-    if len(history) == 1:
-        messages.append({"role": "assistant", "content": initialize_story})
-        messages.append({"role": "user", "content": system_prompt+message})
-        output = api_call_llm(messages,selected_api,model_name,temperature)
-        history.append([None,system_prompt+message])
-        history.append([system_prompt+message,output])
+    if session_type!="True RPG":
+        if len(history) == 1:
+            messages.append({"role": "assistant", "content": initialize_story})
+            messages.append({"role": "user", "content": message})
+            output = api_call_llm(messages,selected_api,model_name,temperature)
+            history.append([None,messages[0]["content"]])
+            history.append([message,output])
+        else:
+            for user_msg, bot_msg in history:
+                if user_msg is not None:
+                    messages.append({"role": "user", "content": user_msg})
+                messages.append({"role": "assistant", "content": bot_msg})
+            messages.append({"role": "user", "content": message})
+            output = api_call_llm(messages,selected_api,model_name,temperature)
+            history.append((message,output))
+        return output
     else:
-        for user_msg, bot_msg in history:
-            if user_msg is not None:
-                messages.append({"role": "user", "content": user_msg})
-            messages.append({"role": "assistant", "content": bot_msg})
-        messages.append({"role": "user", "content": message})
-        output = api_call_llm(messages,selected_api,model_name,temperature)
-        history.append((message,output))
-    return output
+        global roll_needed
+        if len(history) == 1:
+            messages.append({"role": "assistant", "content": initialize_story})
+            messages.append({"role": "user", "content": message})
+            output = api_call_llm(messages,selected_api,model_name,temperature)
+            history.append([None,messages[0]["content"]])
+            history.append([message,output[:-1]])
+            try: 
+                match output[-1]:
+                    case 1:#means that player should continue the story
+                        return output
+                    case 2:#means that the player should roll
+                        roll_needed=True
+                    case 3:#means that new character appears
+                        print("new character appears")
+                    case _:#invalid option
+                        return output
+            except:
+                print("invalid option")
+
+
+
 
 def generate_text(system_prompt,user_story,model_name,selected_api,temperature,max_tokens=500):
     messages = [{"role": "system", "content": system_prompt}] if selected_api != "Anthropic" else []

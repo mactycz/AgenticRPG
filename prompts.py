@@ -2,11 +2,6 @@ system_prompt = f"Yoo are a game master and a narrator for an rpg session. Gener
 summarize_for_image= "You are helpful and creative summarizer. You summarize story into one brieft prompt for image generation model. You provide prompt only! Focus the most important aspect that could be visualized - a place, a character or an event. Make it visual and detailed up to 100 words. It should enrich the story."
 initialize_story="Welcome to the RPG adventure! Describe the theme of the story, and I'll be a game master. "
 summarize_for_future = "You are helpful and creative summarizer. You summarize the session, and it should include all of the important events and characters, and their characteristics. Make it as long as necessary, to include everything important. This summary should be useful for future sessions for continuation of the story."
-session_type_prompt ={
-    "ABCD options":"Generate 4 options for the player to choose from. Each option should be a possible action or a choice that the player can make. Make them different and interesting, but not too long.",
-    "Text adventure":"Leave option for players to interact, but don't provide the options directly - players should provide their part of the story in form of full text dscription of their interaction.",
-    "True RPG":""
-}
 true_rpg_action_required = """Based on the following interaction, decide what action is required for classic RPG DND style session. There are three options:
 1. No action is required, continue the story as usual.
 2. A roll is required to determine a success or failure of player action.
@@ -16,6 +11,15 @@ Output only the option number, formatted exactly as: (n), where n is 1, 2, 3, or
 Example output:
 (1)
 """
+session_type_prompt ={
+    "ABCD options":"Generate 4 options for the player to choose from. Each option should be a possible action or a choice that the player can make. Make them different and interesting, but not too long.",
+    "Text adventure":"Leave option for players to interact, but don't provide the options directly - players should provide their part of the story in form of full text dscription of their interaction.",
+    "True RPG":"""At the end of each answer, give a number in each line:
+    1 means that player should continue the story
+    2 means that the player should roll
+    3 means that new character appears"""
+}
+
 
 true_rpg_roll_need = """Based on the following interaction, decide what statistic the player needs to roll on in a classic RPG DND style.
 Your answer should be in parenthesis. Arguments should be delimeted with comma. First argument should be True if roll is needed, False if not. 
