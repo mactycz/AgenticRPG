@@ -1,3 +1,4 @@
+from prompts import initialize_story
 class AppState:
     def __init__(self):
         self.image_state = {
@@ -45,4 +46,13 @@ class AppState:
         self.roll_needed = False
         self.session_type = "ABCD options"
         self.chat_height={"ABCD options":512,"Text adventure":512,"True RPG":400}
+        self.initialize_story = initialize_story
+        self.character_backstory = ""
+        self.api_selection_llm = "Huggingface API"
+        self.api_selection_image = "Huggingface API"
+        self.llm_name = "meta-llama/Llama-3.1-8B-Instruct"
+        self.temperature = 0.7
+        self.character_name = ""
+        self.character_description = ""
+        self.character_portrait = "helpers/placeholder.png"
         
