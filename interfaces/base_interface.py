@@ -4,6 +4,7 @@ class BaseInterface(ABC):
         self.app_state = app_state
         self.container = None
         self.components = {}
+        self._visible = True
         
     @abstractmethod
     def build(self):
@@ -15,6 +16,12 @@ class BaseInterface(ABC):
         """Connect event handlers"""
         pass
 
-    def get_visibility(self):
-        """Return initial visibility state"""
-        return True
+    @property
+    def visible(self):
+        return self._visible
+    
+    @visible.setter
+    def visible(self, value):
+        self._visible = value
+        if self.container:
+            self.container.visible = value

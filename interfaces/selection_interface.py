@@ -3,8 +3,12 @@ from interfaces.base_interface import BaseInterface
 from session import get_saved_sessions
 
 class SelectionInterface(BaseInterface):
+    def __init__(self, app_state):
+        super().__init__(app_state)
+        self._visible = True
+    
     def build(self):
-        with gr.Column(visible=self.get_visibility()) as self.container:
+        with gr.Column(visible=self.visible) as self.container:
             # LLM Settings Group
             with gr.Group():
                 gr.Markdown("<h4 style='text-align: center; margin: 0; padding: 5px;'>LLM Settings</h4>")

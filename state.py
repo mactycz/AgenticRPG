@@ -44,4 +44,5 @@ class AppState:
         self.true_rpg_interface = {"ABCD options":False,"Text adventure":False,"True RPG":True}
         self.roll_needed = False
         self.session_type = "ABCD options"
+        self.chat_height={"ABCD options":512,"Text adventure":512,"True RPG":400}
         

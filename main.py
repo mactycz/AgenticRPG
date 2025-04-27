@@ -14,6 +14,7 @@ class GradioApp:
             self.selection.register_callbacks()
         demo.launch()
 
+
 if __name__ == '__main__':
     app = GradioApp()
     app.launch()
