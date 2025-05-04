@@ -3,13 +3,11 @@ from interfaces.base_interface import BaseInterface
 from app import chat
 
 class MainInterface(BaseInterface):
-    def __init__(self, app_state):
-        super().__init__(app_state)
-        self._visible = False
-        self.components = {}  # Add components dictionary
+    def __init__(self, app_state, navigate_fn=None, tabs_component=None):
+        super().__init__(app_state, navigate_fn, tabs_component)
 
     def build(self):
-        with gr.Column(visible=self.visible) as self.container:
+        with gr.Column() as self.container:
             with gr.Row():
                 with gr.Column():
                     # Chat interface

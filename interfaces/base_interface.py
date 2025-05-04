@@ -1,27 +1,24 @@
 from abc import ABC, abstractmethod
+
 class BaseInterface(ABC):
-    def __init__(self, app_state):
+    def __init__(self, app_state, navigate_fn=None,tabs_component=None):
         self.app_state = app_state
-        self.container = None
+        self.navigate_fn = navigate_fn  # Function to navigate between tabs
+        self.tabs_component = tabs_component
         self.components = {}
-        self._visible = True
         
     @abstractmethod
     def build(self):
-        """Create interface components within Gradio context"""
+        """Build interface components"""
         pass
 
     @abstractmethod
-    def register_callbacks(self):
-        """Connect event handlers"""
+    def register_callbacks(self, tabs_component):
+        """
+        Connect event handlers
+        
+        Parameters:
+        - tabs_component: The Gradio Tabs component for navigation
+        """
         pass
-
-    @property
-    def visible(self):
-        return self._visible
-    
-    @visible.setter
-    def visible(self, value):
-        self._visible = value
-        if self.container:
-            self.container.visible = value
+        

@@ -2,12 +2,11 @@ import gradio as gr
 from interfaces.base_interface import BaseInterface
 
 class CharacterCreationInterface(BaseInterface):
-    def __init__(self, app_state):
-        super().__init__(app_state)
-        self._visible = False
+    def __init__(self, app_state, navigate_fn=None, tabs_component=None):
+        super().__init__(app_state, navigate_fn, tabs_component)
 
     def build(self):
-        with gr.Column(visible=self.visible) as self.container:
+        with gr.Column() as self.container:
             with gr.Row():
                 with gr.Column(scale=1):
                     self.character_description = gr.Textbox(label="Character Description",interactive=True,lines=5)
