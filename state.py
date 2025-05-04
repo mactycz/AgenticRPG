@@ -1,6 +1,11 @@
 from prompts import initialize_story
+from session import SessionManager
 class AppState:
     def __init__(self):
+        self.session_manager = SessionManager()
+        
+        self.current_session_id = None
+        self.current_session_name = None
         self.image_state = {
             "current_image_path": "helpers/placeholder.png",
             "current_image_index": 0,

@@ -11,6 +11,9 @@ class MainInterface(BaseInterface):
             with gr.Row():
                 with gr.Column():
                     # Chat interface
+                    chatbot_value = [(None, self.app_state.initialize_story)]
+                    if hasattr(self.app_state, 'story') and self.app_state.story:
+                        chatbot_value = self.app_state.story
                     self.components["chat_story"] = gr.ChatInterface(
                         fn=chat,
                         chatbot=gr.Chatbot(
@@ -73,11 +76,11 @@ class MainInterface(BaseInterface):
                         self.components["save_name"] = gr.Textbox(
                             label="Story name",
                             interactive=True,
-                            value=""
+                            value=self.app_state.current_session_name or ""
                         )
                         self.components["save_option"] = gr.Dropdown(
                             label="Save option",
-                            choices=["Full session","Session summary"],
+                            choices=["Full session"],
                             interactive=True
                         )
                         self.components["save_story_button"] = gr.Button("Save the story")
@@ -85,4 +88,24 @@ class MainInterface(BaseInterface):
         return self.container
     
     def register_callbacks(self):
-        pass
+            def save_story_callback(chatbot, name, session_type, image_state):
+                """Callback for saving a story session"""
+                self.app_state.session_manager.set_session_data(name, chatbot, session_type, image_state)
+                session_id = self.app_state.session_manager.save_session()
+                
+                self.app_state.current_session_id = session_id
+                
+                gr.Info(f"Story '{name}' saved successfully")
+                return gr.update(value=name)
+            
+            self.components["save_story_button"].click(
+                fn=save_story_callback,
+                inputs=[
+                    self.components["chat_story"].chatbot,
+                    self.components["save_name"],
+                    gr.State(lambda: self.app_state.session_type),
+                    gr.State(lambda: self.app_state.image_state)
+                ],
+                outputs=[self.components["save_name"]]
+            )
+            

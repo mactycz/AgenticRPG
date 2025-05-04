@@ -1,6 +1,5 @@
 import gradio as gr
 from interfaces.base_interface import BaseInterface
-from session import get_saved_sessions
 
 class SelectionInterface(BaseInterface):
     def __init__(self, app_state, navigate_fn=None, tabs_component=None):
@@ -101,24 +100,85 @@ class SelectionInterface(BaseInterface):
 
             # Saved Sessions Group
             with gr.Group():
+                available_sessions = self.app_state.session_manager.get_saved_sessions()
+                gr.Markdown("<h4 style='text-align: center; margin: 0; padding: 5px;'>Saved Sessions</h4>")
                 with gr.Row():
                     self.components["saved_sessions"] = gr.Dropdown(
                         label="Saved Sessions",
-                        choices=get_saved_sessions(),
+                        choices=available_sessions,
                         allow_custom_value=False
                     )
+                    self.components["refresh_sessions_btn"] = gr.Button("🔄", size="sm")
+                
                 with gr.Row():
-                    self.components["load_story_btn"] = gr.Button(
-                        "Load story",
+                    self.components["load_session_btn"] = gr.Button(
+                        "Load Selected Session",
                         interactive=True
                     )
 
         return self.container
     
-
     def register_callbacks(self):
+        
+        self.components["refresh_sessions_btn"].click(
+            fn=lambda: gr.update(choices=self.app_state.session_manager.get_saved_sessions()),
+            inputs=[],
+            outputs=[self.components["saved_sessions"]]
+        )
+        
+
+        def load_session_and_navigate(session_id):
+            """Load the selected session and navigate to main interface"""
+            if not session_id:
+                gr.Error("Please select a session to load")
+                return self.tabs_component
+            
+            try:
+
+                _, story, session_id, image_state, session_type = self.app_state.session_manager.load_session(session_id)
+
+                self.app_state.image_state = image_state
+                self.app_state.current_session_id = session_id
+                self.app_state.session_type = session_type
+                self.app_state.story = story 
+
+                gr.Info("Session loaded successfully")
+                return self.navigate_fn("main")
+            
+            except Exception as e:
+                gr.Error(f"Failed to load session: {str(e)}")
+                return self.tabs_component
+        
+        self.components["load_session_btn"].click(
+            fn=load_session_and_navigate,
+            inputs=[self.components["saved_sessions"]],
+            outputs=[self.tabs_component]
+        )
+        
+
+        def update_app_state(api_llm, llm_name, temperature, api_image, image_model, session_type):
+            """Update app_state with current interface settings"""
+            self.app_state.api_selection_llm = api_llm
+            self.app_state.llm_name = llm_name
+            self.app_state.temperature = temperature
+            self.app_state.api_selection_image = api_image
+            self.app_state.model_name_image = image_model
+            self.app_state.session_type = session_type
+            return None
+        
+
         self.components["new_session_btn"].click(
+            fn=update_app_state,
+            inputs=[
+                self.components["api_selection_llm"],
+                self.components["llm_name"],
+                self.components["temperature"],
+                self.components["api_selection_image"],
+                self.components["model_name_image"],
+                self.components["session_type"]
+            ],
+            outputs=None
+        ).then(
             fn=lambda: self.navigate_fn("main"),
             outputs=self.tabs_component
         )
-
