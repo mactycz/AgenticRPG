@@ -13,7 +13,7 @@ class AppState:
         }
         self.dropdown_options_llm = ['Local','Huggingface API','OpenAI','Anthropic','OpenRouter']
         self.dropdown_options_image = ['Local','Huggingface API','OpenAI']
-        self.dropdown_options_api = ['','API key', 'Enviromental variable token']
+        self.dropdown_options_api = ['','API key', 'Environmental variable token']
         self.default_keys = {
             'Local':'',
             'Huggingface API':'HF_API_KEY',

@@ -2,7 +2,7 @@ import gradio as gr
 from interfaces.selection_interface import SelectionInterface
 from interfaces.main_interface import MainInterface
 from interfaces.character_creation_interface import CharacterCreationInterface
-from state import AppState
+from app_state import AppState
 from styles.css import css
 
 class GradioApp:

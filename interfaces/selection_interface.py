@@ -1,6 +1,7 @@
 import gradio as gr
 from interfaces.base_interface import BaseInterface
-
+from services.language_model import LanguageModel
+from services.image_model import ImageModel
 class SelectionInterface(BaseInterface):
     def __init__(self, app_state, navigate_fn=None, tabs_component=None):
         super().__init__(app_state, navigate_fn, tabs_component)
@@ -156,13 +157,32 @@ class SelectionInterface(BaseInterface):
         )
         
 
-        def update_app_state(api_llm, llm_name, temperature, api_image, image_model, session_type):
+        def update_app_state(api_llm, api_key_llm, llm_name, provider_llm, temperature,
+                                        api_image, api_key_image, model_name_image, provider_image, 
+                                        image_style, session_type):
             """Update app_state with current interface settings"""
+            # Create LLM instance
+            self.app_state.llm = LanguageModel(
+                api_name=api_llm,
+                api_key=api_key_llm,
+                model_name=llm_name,
+                provider=provider_llm,
+                temperature=temperature
+            )
+            
+            # Create Image Model instance
+            self.app_state.image_model = ImageModel(
+                api_name=api_image,
+                api_key=api_key_image,
+                model_name=model_name_image,
+                provider=provider_image,
+                style=image_style
+            )
             self.app_state.api_selection_llm = api_llm
             self.app_state.llm_name = llm_name
             self.app_state.temperature = temperature
             self.app_state.api_selection_image = api_image
-            self.app_state.model_name_image = image_model
+            self.app_state.model_name_image = model_name_image
             self.app_state.session_type = session_type
             return None
         
@@ -171,10 +191,17 @@ class SelectionInterface(BaseInterface):
             fn=update_app_state,
             inputs=[
                 self.components["api_selection_llm"],
+                self.components["api_auth_llm"],
+                self.components["api_key_llm"],
                 self.components["llm_name"],
+                self.components["provider_llm"],
                 self.components["temperature"],
                 self.components["api_selection_image"],
+                self.components["api_auth_image"],
+                self.components["api_key_image"],
                 self.components["model_name_image"],
+                self.components["provider_image"],
+                self.components["image_style"],
                 self.components["session_type"]
             ],
             outputs=None
