@@ -36,7 +36,7 @@ class AppState:
             'Huggingface API':'meta-llama/Llama-3.1-8B-Instruct',
             'OpenAI':'gpt-4o',
             'Anthropic':'claude-3-5-sonnet-latest',
-            'OpenRouter':'deepseek/deepseek-chat'
+            'OpenRouter':'x-ai/grok-3-mini-beta'
         }
         self.default_models_image = {
             'Local':'',
@@ -60,4 +60,6 @@ class AppState:
         self.character_name = ""
         self.character_description = ""
         self.character_portrait = "helpers/placeholder.png"
-        
+        self.auto_generate_image=False
+        self.story=""
+        self.text_returned=False

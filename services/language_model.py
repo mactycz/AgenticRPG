@@ -1,19 +1,20 @@
-# models/llm.py
 import anthropic
 from openai import OpenAI
 from .base_model import BaseModel
 from local import LocalLlamaClient, LocalTransformersClient
-
+import os
 class LanguageModel(BaseModel):
-    def __init__(self, api_name, api_key, model_name, provider="", temperature=0.7, max_tokens=2000,system_message=""):
-        super().__init__(api_name, api_key, model_name, provider)
+    def __init__(self, api_name, api_key, api_auth, model_name, provider="", temperature=0.7, max_tokens=2000,system_message=""):
+        super().__init__(api_name, api_key, api_auth, model_name, provider)
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.system_message = system_message
         self.connect()
-        
+
     def connect(self):
         """Connect to the selected API"""
+        if self.api_auth == "Environmental variable token":
+            self.api_key = os.environ.get(self.api_key)
         if self.api_name == "Huggingface API":
             if self.provider == "" or self.provider == "HF Inference API":
                 base_url = "https://router.huggingface.co/hf-inference/v1"
@@ -45,16 +46,14 @@ class LanguageModel(BaseModel):
         else:
             raise ValueError(f"Unsupported API: {self.api_name}")
             
-    def generate(self, messages, temperature=None, max_tokens=None):
+    def generate(self, messages):
         """Generate text based on the provided messages"""
-        # Use instance params if not provided in call
-        temperature = temperature if temperature is not None else self.temperature
-        max_tokens = max_tokens if max_tokens is not None else self.max_tokens
+
         api_call={
-        "Huggingface API": lambda msgs:self.client.chat.completions.create(messages=msgs,model = self.model_name,temperature=temperature,max_tokens=max_tokens).choices[0].message.content,
-        "OpenAI": lambda msgs: self.client.chat.completions.create(model=self.model_name,messages=msgs, temperature=temperature, max_tokens=max_tokens).choices[0].message.content,
-        "Anthropic": lambda msgs: self.client.messages.create(model=self.model_name,messages=msgs, temperature=temperature, max_tokens=max_tokens,system=self.system_message).content[0].text,
-        "OpenRouter":lambda msgs: self.client.chat.completions.create(messages=msgs,model = self.model_name,temperature=temperature,max_tokens=max_tokens).choices[0].message.content,
+        "Huggingface API": lambda msgs:self.client.chat.completions.create(messages=msgs,model = self.model_name,temperature=self.temperature,max_tokens=self.max_tokens).choices[0].message.content,
+        "OpenAI": lambda msgs: self.client.chat.completions.create(model=self.model_name,messages=msgs, temperature=self.temperature, max_tokens=self.max_tokens).choices[0].message.content,
+        "Anthropic": lambda msgs: self.client.messages.create(model=self.model_name,messages=msgs, temperature=self.temperature, max_tokens=self.max_tokens,system=self.system_message).content[0].text,
+        "OpenRouter":lambda msgs: self.client.chat.completions.create(messages=msgs,model = self.model_name,temperature=self.temperature,max_tokens=self.max_tokens).choices[0].message.content,
         "Local": lambda msgs: self.client.generate_response(msgs)
         }
         return api_call[self.api_name](messages)

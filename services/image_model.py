@@ -1,19 +1,21 @@
-# models/image_model.py
 import requests
 from io import BytesIO
 from PIL import Image
 from openai import OpenAI
 from huggingface_hub import InferenceClient
 from .base_model import BaseModel
-
+import os
 class ImageModel(BaseModel):
-    def __init__(self, api_name, api_key, model_name, provider="", style=""):
-        super().__init__(api_name, api_key, model_name, provider)
+    def __init__(self, api_name, api_key,api_auth, model_name, provider="", style=""):
+        super().__init__(api_name, api_key,api_auth, model_name, provider)
         self.style = style
+        self.timeout=30
         self.connect()
         
     def connect(self):
         """Connect to the selected API"""
+        if self.api_auth == "Environmental variable token":
+            self.api_key = os.environ.get(self.api_key)
         if self.api_name == "Huggingface API":
             provider = self.provider if self.provider != "" else "hf-inference"
             self.client = InferenceClient(
@@ -37,7 +39,7 @@ class ImageModel(BaseModel):
         
     def generate(self,prompt):
         api_call = {
-            "OpenAI" : lambda prompt: self.client.images.generate(prompt=prompt,model=self.model_name,),
+            "OpenAI" : lambda prompt: self.client.images.generate(prompt=prompt,model=self.model_name,timeout=30),
             "Huggingface API" : lambda prompt : self.client.text_to_image(prompt=prompt,model=self.model_name)
         }
         image = api_call[self.api_name](prompt)

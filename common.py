@@ -23,7 +23,7 @@ default_models_llm = {
     'Huggingface API':'meta-llama/Llama-3.1-8B-Instruct',
     'OpenAI':'gpt-4o',
     'Anthropic':'claude-3-5-sonnet-latest',
-    'OpenRouter':'deepseek/deepseek-chat'
+    'OpenRouter':'x-ai/grok-3-mini-beta'
 }
 default_models_image = {
     'Local':'',
