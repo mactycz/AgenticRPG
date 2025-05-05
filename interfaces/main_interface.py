@@ -235,7 +235,7 @@ class MainInterface(BaseInterface):
         image_model = self.app_state.image_model
         prompt = self.app_state.llm.generate([{"role": "user", "content": summarize_for_image + self.app_state.story[-1][1]}])
         if image_model.style != "":
-            prompt = prompt + f' Generate the image in {self.app_state.image_model} style.'
+            prompt = prompt + f' Generate the image in {self.app_state.image_model.style} style.'
         image = image_model.generate(prompt)
         date = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
         image_dir = f"sessions/{self.app_state.session_manager.session_id}/images"
