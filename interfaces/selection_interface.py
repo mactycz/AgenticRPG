@@ -122,7 +122,7 @@ class SelectionInterface(BaseInterface):
         self.components["load_session_btn"].click(
             fn=self.load_session,
             inputs=[self.components["saved_sessions"]],
-            outputs=[self.tabs_component]
+            outputs=[self.tabs_component,self.app_state.interfaces['main'].components["chat_story"].chatbot]
         )
         self.components["new_session_btn"].click(
             fn=self.create_new_session,
@@ -163,9 +163,8 @@ class SelectionInterface(BaseInterface):
             self.app_state.current_session_id = session_id
             self.app_state.session_type = session_type
             self.app_state.story = story 
-
             gr.Info("Session loaded successfully")
-            return self.navigate_fn("main")
+            return self.navigate_fn("main"),story
         
         except Exception as e:
             gr.Error(f"Failed to load session: {str(e)}")
@@ -202,7 +201,6 @@ class SelectionInterface(BaseInterface):
                 style=image_style
             )
             
-            self.app_state.story = []
             self.app_state.image_state = {
                 "images": [],
                 "current_image_index": 0,

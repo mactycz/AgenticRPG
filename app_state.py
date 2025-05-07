@@ -2,7 +2,7 @@ from prompts import initialize_story
 from session import SessionManager
 class AppState:
     def __init__(self):
-        self.session_manager = SessionManager()
+        self.session_manager = SessionManager(self)
         
         self.current_session_id = None
         self.current_session_name = None
@@ -36,7 +36,7 @@ class AppState:
             'Huggingface API':'meta-llama/Llama-3.1-8B-Instruct',
             'OpenAI':'gpt-4o',
             'Anthropic':'claude-3-5-sonnet-latest',
-            'OpenRouter':'x-ai/grok-3-mini-beta'
+            'OpenRouter':'deepseek/deepseek-chat-v3-0324'
         }
         self.default_models_image = {
             'Local':'',
@@ -51,7 +51,6 @@ class AppState:
         self.roll_needed = False
         self.session_type = "ABCD options"
         self.chat_height={"ABCD options":512,"Text adventure":512,"True RPG":400}
-        self.initialize_story = initialize_story
         self.character_backstory = ""
         self.api_selection_llm = "Huggingface API"
         self.api_selection_image = "Huggingface API"
@@ -61,5 +60,4 @@ class AppState:
         self.character_description = ""
         self.character_portrait = "helpers/placeholder.png"
         self.auto_generate_image=False
-        self.story=""
-        self.text_returned=False
+        self.story=[(None, initialize_story)]

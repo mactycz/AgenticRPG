@@ -11,6 +11,7 @@ class GradioApp:
         self.tabs = None 
         self.interfaces = {}
 
+
     def navigate_to(self, tab_name):
         """Global navigation function"""
         print(f"Navigating to {tab_name}")
@@ -26,7 +27,7 @@ class GradioApp:
                     "main": MainInterface(self.app_state, self.navigate_to, self.tabs),
                     "character": CharacterCreationInterface(self.app_state, self.navigate_to, self.tabs)
                 }
-                
+                self.app_state.interfaces=self.interfaces
                 tab_items = []
                 for i, (name, interface) in enumerate(self.interfaces.items()):
                     with gr.TabItem(label=name.capitalize(), id=i) as tab:

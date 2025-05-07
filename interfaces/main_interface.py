@@ -15,7 +15,7 @@ class MainInterface(BaseInterface):
                         fn=self.chat,
                         chatbot=gr.Chatbot(
                             height=512,
-                            value=[(None, self.app_state.initialize_story)]
+                            value=self.app_state.story
                         ),
                         additional_inputs=[
                             gr.Checkbox(label="Automatically generate an image")
@@ -137,7 +137,6 @@ class MainInterface(BaseInterface):
             self.app_state.image_state["current_image_path"],
             f"{current_index + 1}/{image_count}"
         )
-
 
     def chat(self, message, history, auto_generate_image=False):
         """

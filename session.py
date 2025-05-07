@@ -7,7 +7,7 @@ from pathlib import Path
 
 class SessionManager:
     """Manages saving, loading, and tracking RPG game sessions."""
-    def __init__(self, registry_path="sessions_registry.json", sessions_dir="sessions"):
+    def __init__(self, app_state, registry_path="sessions_registry.json", sessions_dir="sessions"):
         self.registry_path = registry_path
         self.sessions_dir = sessions_dir
         self.session_id = None
@@ -16,6 +16,7 @@ class SessionManager:
         self.format_type = "Full session"  # Default format
         self.image_state = {}
         self.story = []
+        self.app_state=app_state
         os.makedirs(sessions_dir, exist_ok=True)
 
     def generate_session_id(self):
@@ -67,12 +68,6 @@ class SessionManager:
     def set_session_data(self, name, story, session_type="rpg", image_state=None):
         """
         Set the current session data.
-        
-        Args:
-            name (str): Name of the session
-            story (list): The story content
-            session_type (str): Type of session (default: "rpg")
-            image_state (dict, optional): Current state of images
         """
         self.session_name = name
         self.story = story
@@ -108,7 +103,7 @@ class SessionManager:
             
             if not entry:
                 raise gr.Error("Session not found in registry")
-            
+
             # Update current session state
             self.session_id = session_id
             self.session_name = entry['name']
@@ -117,13 +112,14 @@ class SessionManager:
             self.image_state = entry['image_state']
             
             session_path = Path(self.sessions_dir) / session_id
-            
+
             if entry['format'] == "Full session":
                 file_path = session_path / f"{entry['name']}.json"
                 with open(file_path, "r") as file:
                     self.story = json.load(file)
-                    return "", self.story, session_id, entry['image_state'], entry['type']
-                    
+                    self.app_state.story =  self.story
+                    return  "", self.story, session_id, entry['image_state'], entry['type']
+
         except Exception as e:
             raise gr.Error(f"Failed to load session: {str(e)}")
 
