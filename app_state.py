@@ -61,3 +61,4 @@ class AppState:
         self.character_portrait = "helpers/placeholder.png"
         self.auto_generate_image=False
         self.story=[(None, initialize_story)]
+        self.text_returned=False
