@@ -62,4 +62,6 @@ class LanguageModel(BaseModel):
         "Local": lambda msgs: self.client.generate_response(msgs),
         "Deepinfra": lambda msgs: self.client.chat.completions.create(model=self.model_name,messages=msgs, temperature=self.temperature, max_tokens=self.max_tokens).choices[0].message.content,
         }
-        return api_call[self.api_name](messages)
+        text=api_call[self.api_name](messages)
+        print(text)
+        return text

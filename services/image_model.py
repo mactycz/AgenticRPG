@@ -5,6 +5,7 @@ from openai import OpenAI
 from huggingface_hub import InferenceClient
 from .base_model import BaseModel
 import os
+import base64
 class ImageModel(BaseModel):
     def __init__(self, api_name, api_key,api_auth, model_name, provider="", style=""):
         super().__init__(api_name, api_key,api_auth, model_name, provider)
@@ -25,6 +26,12 @@ class ImageModel(BaseModel):
             
         elif self.api_name == "OpenAI":
             self.client = OpenAI(api_key=self.api_key)
+
+        elif self.api_name == "Deepinfra":
+            self.client = OpenAI(
+                base_url="https://api.deepinfra.com/v1/openai",
+                api_key=self.api_key
+            )
             
         elif self.api_name == "Local":
             print("Local image generation not implemented")
@@ -41,7 +48,7 @@ class ImageModel(BaseModel):
         api_call = {
             "OpenAI" : lambda prompt: self.client.images.generate(prompt=prompt,model=self.model_name,timeout=30),
             "Huggingface API" : lambda prompt : self.client.text_to_image(prompt=prompt,model=self.model_name),
-            "Deepinfra": lambda prompt: self.client.images.generate(prompt=prompt,model=self.model_name,timeout=30),
+            "Deepinfra": lambda prompt: self.client.images.generate(prompt=prompt,model=self.model_name,timeout=30,response_format="b64_json", ),
         }
         image = api_call[self.api_name](prompt)
         if self.api_name == "OpenAI":
@@ -51,5 +58,9 @@ class ImageModel(BaseModel):
                 return Image.open(BytesIO(image_response.content))
             else:
                 raise Exception("Failed to download OpenAI image")
+        elif self.api_name == "Deepinfra":
+            base64_data = image.data[0].b64_json
+            image_data = base64.b64decode(base64_data)
+            return Image.open(BytesIO(image_data))
 
         return image
