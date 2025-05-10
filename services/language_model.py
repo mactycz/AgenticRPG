@@ -43,6 +43,11 @@ class LanguageModel(BaseModel):
                 base_url="https://openrouter.ai/api/v1",
                 api_key=self.api_key
             )
+        elif self.api_name=="Deepinfra":
+            self.client =  OpenAI(
+                api_key=self.api_key,
+                base_url="https://api.deepinfra.com/v1/openai"
+            )
         else:
             raise ValueError(f"Unsupported API: {self.api_name}")
             
@@ -54,6 +59,7 @@ class LanguageModel(BaseModel):
         "OpenAI": lambda msgs: self.client.chat.completions.create(model=self.model_name,messages=msgs, temperature=self.temperature, max_tokens=self.max_tokens).choices[0].message.content,
         "Anthropic": lambda msgs: self.client.messages.create(model=self.model_name,messages=msgs, temperature=self.temperature, max_tokens=self.max_tokens,system=self.system_message).content[0].text,
         "OpenRouter":lambda msgs: self.client.chat.completions.create(messages=msgs,model = self.model_name,temperature=self.temperature,max_tokens=self.max_tokens).choices[0].message.content,
-        "Local": lambda msgs: self.client.generate_response(msgs)
+        "Local": lambda msgs: self.client.generate_response(msgs),
+        "Deepinfra": lambda msgs: self.client.chat.completions.create(model=self.model_name,messages=msgs, temperature=self.temperature, max_tokens=self.max_tokens).choices[0].message.content,
         }
         return api_call[self.api_name](messages)

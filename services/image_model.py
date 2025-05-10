@@ -40,7 +40,8 @@ class ImageModel(BaseModel):
     def generate(self,prompt):
         api_call = {
             "OpenAI" : lambda prompt: self.client.images.generate(prompt=prompt,model=self.model_name,timeout=30),
-            "Huggingface API" : lambda prompt : self.client.text_to_image(prompt=prompt,model=self.model_name)
+            "Huggingface API" : lambda prompt : self.client.text_to_image(prompt=prompt,model=self.model_name),
+            "Deepinfra": lambda prompt: self.client.images.generate(prompt=prompt,model=self.model_name,timeout=30),
         }
         image = api_call[self.api_name](prompt)
         if self.api_name == "OpenAI":
