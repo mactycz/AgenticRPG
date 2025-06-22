@@ -71,8 +71,9 @@ class SelectionInterface(BaseInterface):
                     )
                 
                 with gr.Row():
-                    self.components["model_name_image"] = gr.Textbox(
+                    self.components["model_name_image"] = gr.Dropdown(
                         label="Image model name",
+                        choices=self.app_state.image_models_hf,
                         interactive=True,
                         value=self.app_state.default_models_image["Huggingface API"]
                     )

@@ -43,10 +43,14 @@ class AppState:
         }
         self.default_models_image = {
             'Local':'',
-            'Huggingface API':'stabilityai/stable-diffusion-3.5-large-turbo',
+            'Huggingface API':'black-forest-labs/FLUX.1-schnell',
             'OpenAI':'dall-e-3',
             'Deepinfra':'stabilityai/sd3.5'
         }
+        self.image_models_hf = [
+            'stabilityai/stable-diffusion-3.5-large-turbo',
+            'black-forest-labs/FLUX.1-schnell'
+        ]
         self.api_key = ""
         self.api_token = ""
         self.session_types =["ABCD options","Text adventure","True RPG"]
