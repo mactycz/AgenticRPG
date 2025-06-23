@@ -118,7 +118,7 @@ class SessionManager:
                 with open(file_path, "r") as file:
                     self.story = json.load(file)
                     self.app_state.story =  self.story
-                    return  "", self.story, session_id, entry['image_state'], entry['type']
+                    return  self.story, session_id, entry['image_state'], entry['type']
 
         except Exception as e:
             raise gr.Error(f"Failed to load session: {str(e)}")
