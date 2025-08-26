@@ -189,8 +189,10 @@ class SelectionInterface(BaseInterface):
                 "image_count": 0,
                 "current_image_path": None
             }
-            
-            return self.navigate_fn("main")
+            if self.app_state.session_type == 'True RPG':
+                return self.navigate_fn("character")
+            else:
+                return self.navigate_fn("main")
             
         except Exception as e:
             gr.Error(f"Failed to create new session: {str(e)}")
