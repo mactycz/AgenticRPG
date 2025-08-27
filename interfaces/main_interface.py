@@ -3,6 +3,7 @@ from interfaces.base_interface import BaseInterface
 from prompts import *
 import os
 import datetime
+from character import Character
 class MainInterface(BaseInterface):
     def __init__(self, app_state, navigate_fn=None, tabs_component=None):
         super().__init__(app_state, navigate_fn, tabs_component)
@@ -11,40 +12,39 @@ class MainInterface(BaseInterface):
         with gr.Column() as self.container:
             with gr.Row():
                 with gr.Column():
+                    self.components["automatic_image_state"] = gr.State(False)
                     self.components["chat_story"] = gr.ChatInterface(
                         fn=self.chat,
                         chatbot=gr.Chatbot(
                             height=512,
                             value=self.app_state.story
                         ),
-                        additional_inputs=[
-                            gr.Checkbox(label="Automatically generate an image")
-                        ]
+                        additional_inputs=[self.components["automatic_image_state"] ]
                     )
                     
-                    # # RPG interface
-                    # self.components["true_rpg_interface"] = gr.Row(visible=False)
-                    # with self.components["true_rpg_interface"]:
-                    #     with gr.Column(min_width=300):
-                    #         self.components["character_portrait_main"] = gr.Image(
-                    #             "helpers/placeholder.png", 
-                    #             interactive=False,
-                    #             min_width=300
-                    #         )
-                    #     with gr.Column():
-                    #         with gr.Column():
-                    #             self.components["str_main"] = gr.Markdown("🗡 **Strength**: 18")
-                    #             self.components["dex_main"] = gr.Markdown("🏹 **Dexterity**: 14")
-                    #             self.components["int_main"] = gr.Markdown("📚 **Intelligence**: 16")
-                    #             self.components["wis_main"] = gr.Markdown("🔮 **Wisdom**: 12")
-                    #             self.components["con_main"] = gr.Markdown("❤️ **Constitution**: 15")
-                    #             self.components["cha_main"] = gr.Markdown("🎭 **Charisma**: 10")
-                    #         with gr.Column():
-                    #             self.components["character_name_main"] = gr.Markdown("**Character Name**")
-                    #             self.components["hp_main"] = gr.Markdown("**❤ 100/100**")
-                    #             with gr.Row():
-                    #                 self.components["roll_button"] = gr.Button("🎲")
-                    #                 self.components["roll_results"] = gr.Markdown()
+                    # RPG interface
+                    self.components["true_rpg_interface"] = gr.Row(visible=False)
+                    with self.components["true_rpg_interface"]:
+                        with gr.Column(min_width=256):
+                            self.components["character_portrait_main"] = gr.Image(
+                                "helpers/placeholder.png", 
+                                interactive=False,
+                                min_width=256
+                            )
+                        with gr.Column():
+                            with gr.Column():
+                                self.components["str_main"] = gr.Markdown("🗡 **Strength**: 18")
+                                self.components["dex_main"] = gr.Markdown("🏹 **Dexterity**: 14")
+                                self.components["int_main"] = gr.Markdown("📚 **Intelligence**: 16")
+                                self.components["wis_main"] = gr.Markdown("🔮 **Wisdom**: 12")
+                                self.components["con_main"] = gr.Markdown("❤️ **Constitution**: 15")
+                                self.components["cha_main"] = gr.Markdown("🎭 **Charisma**: 10")
+                            with gr.Column():
+                                self.components["character_name_main"] = gr.Markdown("**Character Name**")
+                                self.components["hp_main"] = gr.Markdown("**❤ 100/100**")
+                                with gr.Row():
+                                    self.components["roll_button"] = gr.Button("🎲")
+                                    self.components["roll_results"] = gr.Markdown()
 
                 with gr.Column():
                     self.components["image"] = gr.Image(
@@ -61,7 +61,8 @@ class MainInterface(BaseInterface):
                         )
                         self.components["next"] = gr.Button("→")
                     self.components["image_button"] = gr.Button("Generate Image")
-    
+                    self.components["automatic_image"]= gr.Checkbox(label="Automatically generate an image")
+                    self.components["chat_story"].additional_inputs = [self.components["automatic_image"]]
                     with gr.Row():
                         self.components["save_name"] = gr.Textbox(
                             label="Story name",
@@ -115,6 +116,15 @@ class MainInterface(BaseInterface):
             self.components["chat_story"].chatbot.change(
                 fn=self.conditional_generate_image,
                 outputs=[self.components["image"], self.components["counter"]]
+            )
+            self.components["automatic_image"].change(
+                fn=lambda v: v,
+                inputs=self.components["automatic_image"],
+                outputs=self.components["automatic_image_state"]
+            )
+            self.components["roll_button"].click(
+                fn=lambda: f"{Character.roll()}",
+                outputs=self.components["roll_results"]
             )
 
     def navigate_images(self,direction):
