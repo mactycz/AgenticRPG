@@ -22,6 +22,7 @@ class SessionManager:
     def generate_session_id(self):
         """Generate a unique session ID."""
         self.session_id = str(uuid.uuid4())
+        self.app_state.current_session_id = self.session_id
         return self.session_id
     
     def _load_registry(self):
@@ -53,7 +54,7 @@ class SessionManager:
             "type": self.session_type,
             "format": self.format_type,  #currently only full session
             "timestamp": datetime.datetime.now().isoformat(),
-            "image_state": self.image_state
+            "image_state": self.app_state.image_state
         })
         
         self._save_registry(registry)
@@ -65,14 +66,13 @@ class SessionManager:
         registry = self._load_registry()
         return [(f"{entry['name']} ({entry['format']})", entry["id"]) for entry in registry]
     
-    def set_session_data(self, name, story, session_type="rpg", image_state=None):
+    def set_session_data(self, name, story, session_type="rpg"):
         """
         Set the current session data.
         """
         self.session_name = name
         self.story = story
         self.session_type = session_type
-        self.image_state = image_state or {}
         
     def save_session(self):
         """
@@ -109,7 +109,7 @@ class SessionManager:
             self.session_name = entry['name']
             self.session_type = entry['type']
             self.format_type = entry['format']
-            self.image_state = entry['image_state']
+            self.app_state.image_state = entry['image_state']
             
             session_path = Path(self.sessions_dir) / session_id
 

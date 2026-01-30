@@ -182,7 +182,7 @@ class SelectionInterface(BaseInterface):
         """Create new session using loaded options"""
         try:
             self.load_options(*args)
-            
+            self.app_state.session_manager.session_id = self.app_state.session_manager.generate_session_id()
             self.app_state.image_state = {
                 "images": [],
                 "current_image_index": 0,

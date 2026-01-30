@@ -79,9 +79,9 @@ class MainInterface(BaseInterface):
         return self.container
     
     def register_callbacks(self):
-            def save_story_callback(chatbot, name, session_type, image_state):
+            def save_story_callback(chatbot, name):
                 """Callback for saving a story session"""
-                self.app_state.session_manager.set_session_data(name, chatbot, session_type, image_state)
+                self.app_state.session_manager.set_session_data(name, chatbot)
                 session_id = self.app_state.session_manager.save_session()
                 
                 self.app_state.current_session_id = session_id
@@ -93,9 +93,7 @@ class MainInterface(BaseInterface):
                 fn=save_story_callback,
                 inputs=[
                     self.components["chat_story"].chatbot,
-                    self.components["save_name"],
-                    gr.State(lambda: self.app_state.session_type),
-                    gr.State(lambda: self.app_state.image_state)
+                    self.components["save_name"]
                 ]
             )
             self.components["next"].click(
