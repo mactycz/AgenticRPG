@@ -2,6 +2,7 @@ import gradio as gr
 from interfaces.base_interface import BaseInterface
 from prompts import generate_portrait,initialize_story
 import os
+import datetime
 class CharacterCreationInterface(BaseInterface):
     def __init__(self, app_state, navigate_fn=None, tabs_component=None):
         super().__init__(app_state, navigate_fn, tabs_component)
@@ -32,7 +33,7 @@ class CharacterCreationInterface(BaseInterface):
 
         self.components["generate_portrait"].click(
             fn=self.generate_portrait_image,
-            inputs = [self.components["character_description"],self.components["backstory"]],
+            inputs = [self.components["character_description"],self.components["backstory"], self.components["character_name"]],
             outputs=self.components["character_portrait"]
         )
         self.components["begin_adventure"].click(
@@ -46,11 +47,12 @@ class CharacterCreationInterface(BaseInterface):
             outputs=[self.tabs_component,
                      self.app_state.interfaces['main'].components["chat_story"].chatbot,
                      self.app_state.interfaces['main'].components["true_rpg_interface"],
-                     self.app_state.interfaces['main'].components["chat_story"].chatbot
+                     self.app_state.interfaces['main'].components["chat_story"].chatbot,
+                     self.app_state.interfaces['main'].components["character_portrait_main"]
             ]
         )
 
-    def generate_portrait_image(self,description,backstory):
+    def generate_portrait_image(self, description, backstory, character_name):
         image_model = self.app_state.image_model
         prompt = self.app_state.llm.generate([{"role": "user", "content": generate_portrait + description + ". Character backstory: "+backstory}])
         if image_model.style != "":
@@ -58,7 +60,7 @@ class CharacterCreationInterface(BaseInterface):
         image = image_model.generate(prompt)
         image_dir = f"sessions/{self.app_state.session_manager.session_id}/images"
         os.makedirs(image_dir, exist_ok=True)
-        image_path = f"{image_dir}/image-{self.components['character_name']}.png"
+        image_path = f"{image_dir}/image-{character_name}.png"
         image.save(image_path)
         return image_path
     
@@ -73,11 +75,13 @@ class CharacterCreationInterface(BaseInterface):
         Your description: {character_description}
         """
         self.app_state.story = [(None, init_story_true_RPG)]
+        print(self.app_state.character_portrait)
         return (
             self.navigate_fn("main"),# tabs
             self.app_state.story,# chatbot history
             gr.update(visible=True),# update visibility
-            gr.update(height=384)# update height
+            gr.update(height=384), # update height
+            self.app_state.character_portrait
         )
 
         

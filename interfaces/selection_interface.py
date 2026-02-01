@@ -131,8 +131,17 @@ class SelectionInterface(BaseInterface):
         ]
         self.components["load_session_btn"].click(
             fn=self.load_session,
-            inputs=[self.components["saved_sessions"]]+self.session_options,
-            outputs=[self.tabs_component,self.app_state.interfaces['main'].components["chat_story"].chatbot]
+            inputs=[self.components["saved_sessions"]] + self.session_options,
+            outputs=[
+                self.tabs_component,
+                self.app_state.interfaces['main'].components["chat_story"].chatbot,
+                self.app_state.interfaces['main'].components["image"],
+                self.app_state.interfaces['main'].components["counter"],
+                self.app_state.interfaces['main'].components["save_name"],
+                self.app_state.interfaces['main'].components["true_rpg_interface"],
+                self.app_state.interfaces['main'].components["chat_story"].chatbot,  # for height update
+                self.app_state.interfaces['main'].components["character_portrait_main"]
+            ]
         )
         self.components["new_session_btn"].click(
             fn=self.create_new_session,
@@ -183,6 +192,7 @@ class SelectionInterface(BaseInterface):
         try:
             self.load_options(*args)
             self.app_state.session_manager.session_id = self.app_state.session_manager.generate_session_id()
+            self.app_state.current_session_id = self.app_state.session_manager.session_id
             self.app_state.image_state = {
                 "images": [],
                 "current_image_index": 0,
@@ -198,22 +208,63 @@ class SelectionInterface(BaseInterface):
             gr.Error(f"Failed to create new session: {str(e)}")
             return self.tabs_component
 
-    def load_session(self, session_id,*args):
+    def load_session(self, session_selection, *args):
         """Load session using the same options initialization"""
-        if not session_id:
+        if not session_selection:
             gr.Error("Please select a session to load")
-            return self.tabs_component
+            return self.tabs_component, [], None, "", "", gr.update(), gr.update(), None
         
         try:
+            # Extract session_id from dropdown
+            if isinstance(session_selection, tuple):
+                session_id = session_selection[1]
+            else:
+                session_id = session_selection
+            
+            # Load the session data
             story, session_id, image_state, session_type = self.app_state.session_manager.load_session(session_id)
+            
+            # Initialize models with current options
             self.load_options(*args)
+            
+            # Update app_state
             self.app_state.image_state = image_state
             self.app_state.current_session_id = session_id
             self.app_state.story = story
             self.app_state.session_type = session_type
-            gr.Info("Session loaded successfully")
-            return self.navigate_fn("main"), story
+            
+            # Prepare display values
+            current_image = image_state.get("current_image_path", "helpers/placeholder.png")
+            current_index = image_state.get("current_image_index", 0)
+            image_count = image_state.get("image_count", 0)
+            counter_text = f"{current_index + 1}/{image_count}" if image_count > 0 else "0/0"
+            session_name = self.app_state.session_manager.session_name
+            
+            gr.Info(f"Session '{session_name}' loaded successfully")
+            
+            if self.app_state.session_type == 'True RPG':
+                return (
+                    self.navigate_fn("main"),
+                    self.app_state.story,
+                    current_image,
+                    counter_text,
+                    session_name,
+                    gr.update(visible=True),
+                    gr.update(height=384),
+                    self.app_state.character_portrait
+                )
+            else:
+                return (
+                    self.navigate_fn("main"),
+                    story,
+                    current_image,
+                    counter_text,
+                    session_name,
+                    gr.update(visible=False),
+                    gr.update(height=512),
+                    None
+                )
         
         except Exception as e:
             gr.Error(f"Failed to load session: {str(e)}")
-            return self.tabs_component,[]
+            return self.tabs_component, [], None, "", "", gr.update(), gr.update(), None

@@ -48,15 +48,26 @@ class SessionManager:
                     if not (entry["name"] == self.session_name and entry["format"] == self.format_type)]
         
         # Add the new entry
-        registry.append({
+        registry_entry = {
             "name": self.session_name,
             "id": self.session_id,
             "type": self.session_type,
-            "format": self.format_type,  #currently only full session
+            "format": self.format_type,
             "timestamp": datetime.datetime.now().isoformat(),
             "image_state": self.app_state.image_state
-        })
+        }
+        image_dir = f"sessions/{self.app_state.session_manager.session_id}/images"
+        image_path = f"{image_dir}/image-{self.app_state.character_name}.png"
+        # Add character data if this is a True RPG session
+        if self.session_type == "True RPG":
+            registry_entry["character"] = {
+                "character_name": self.app_state.character_name,
+                "character_description": self.app_state.character_description,
+                "character_portrait": image_path,
+                "character_backstory": self.app_state.character_backstory
+            }
         
+        registry.append(registry_entry)
         self._save_registry(registry)
 
     def get_saved_sessions(self):
@@ -66,13 +77,13 @@ class SessionManager:
         registry = self._load_registry()
         return [(f"{entry['name']} ({entry['format']})", entry["id"]) for entry in registry]
     
-    def set_session_data(self, name, story, session_type="rpg"):
+    def set_session_data(self, name, story):
         """
         Set the current session data.
         """
         self.session_name = name
         self.story = story
-        self.session_type = session_type
+        self.session_type = self.app_state.session_type
         
     def save_session(self):
         """
@@ -109,7 +120,26 @@ class SessionManager:
             self.session_name = entry['name']
             self.session_type = entry['type']
             self.format_type = entry['format']
-            self.app_state.image_state = entry['image_state']
+            
+            # Update image state in app_state
+            self.app_state.image_state = entry.get('image_state', {
+                "current_image_path": "helpers/placeholder.png",
+                "current_image_index": 0,
+                "image_count": 0
+            })
+            
+            # Update session info in app_state
+            self.app_state.current_session_id = session_id
+            self.app_state.current_session_name = self.session_name
+            self.app_state.session_type = entry['type']
+            
+            # Load character data if this is a True RPG session
+            if entry['type'] == "True RPG" and 'character' in entry:
+                char_data = entry['character']
+                self.app_state.character_name = char_data.get('character_name', '')
+                self.app_state.character_description = char_data.get('character_description', '')
+                self.app_state.character_portrait = char_data.get('character_portrait', 'helpers/placeholder.png')
+                self.app_state.character_backstory = char_data.get('character_backstory', '')
             
             session_path = Path(self.sessions_dir) / session_id
 
@@ -117,11 +147,10 @@ class SessionManager:
                 file_path = session_path / f"{entry['name']}.json"
                 with open(file_path, "r") as file:
                     self.story = json.load(file)
-                    self.app_state.story =  self.story
-                    return  self.story, session_id, entry['image_state'], entry['type']
+                    self.app_state.story = self.story
+                    return self.story, session_id, self.app_state.image_state, entry['type']
 
         except Exception as e:
             raise gr.Error(f"Failed to load session: {str(e)}")
-
 
         
